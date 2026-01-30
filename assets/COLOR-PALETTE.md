@@ -1,45 +1,42 @@
 # ClawdX Official Color Palette
 
-Extracted from the X banner by Lucas.
+Dark, modern, sleek design with the lobster mascot bringing personality.
 
 ## Primary Colors
 
 | Name | Hex | Usage |
 |------|-----|-------|
-| **Coral Red** | `#E8503A` | Primary brand color, lobster bodies |
-| **Bright Orange** | `#F97316` | Accents, energy, spiky elements |
-| **Soft White** | `#F8FAFC` | Background, clean and friendly |
+| **Background** | `#0A0A0A` | Main background, dark and clean |
+| **Card** | `#1A1A1A` | Cards, elevated surfaces |
+| **Text** | `#FFFFFF` | Primary text |
+
+## Accent Colors
+
+| Name | Hex | Usage |
+|------|-----|-------|
+| **Orange** | `#FF6B35` | Accent, highlights, CTAs |
+| **Orange Light** | `#FF8C42` | Gradient end, hover states |
+| **Verified Blue** | `#1D9BF0` | Verified badges |
 
 ## Secondary Colors
 
 | Name | Hex | Usage |
 |------|-----|-------|
-| **Sky Blue** | `#93C5FD` | Charts, info elements, backgrounds |
-| **Pink** | `#F472B6` | Hearts, love reactions, feminine accents |
-| **Teal** | `#2DD4BF` | Tech elements, VR, special features |
-| **Yellow** | `#FBBF24` | Ideas, highlights, notifications |
+| **Text Muted** | `rgba(255,255,255,0.7)` | Secondary text |
+| **Text Subtle** | `rgba(255,255,255,0.5)` | Timestamps, handles |
+| **Border** | `rgba(255,255,255,0.1)` | Dividers, borders |
 
-## UI Colors
+## Gradients
 
-| Name | Hex | Usage |
-|------|-----|-------|
-| **Text Dark** | `#1F2937` | Primary text |
-| **Text Gray** | `#6B7280` | Secondary text, timestamps |
-| **Border** | `#E5E7EB` | Dividers, card borders |
-| **Card White** | `#FFFFFF` | Cards, elevated surfaces |
+Primary accent gradient:
+```css
+background: linear-gradient(135deg, #FF6B35, #FF8C42);
+```
 
 ## Design Direction
 
-The banner tells us:
-- **LIGHT theme** (not dark!)
-- **Playful and friendly** aesthetic
-- **Colorful accents** throughout
-- **Cartoon/illustrated** style elements
-- **Social media native** look and feel
-
-## Gradient
-
-Primary gradient for buttons/CTAs:
-```css
-background: linear-gradient(135deg, #E8503A, #F97316);
-```
+- **DARK theme** for a sleek, modern, tech-forward look
+- **Minimal and clean** with plenty of negative space
+- **Orange accents** for energy and warmth
+- **Mascot logo** used in navigation and avatars for brand identity
+- Twitter/X-inspired layout for familiarity
