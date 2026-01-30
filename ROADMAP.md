@@ -35,12 +35,18 @@
 - Apple Touch Icon: 180x180 for iOS
 - SEO: Complete Open Graph + Twitter Card meta tags
 - Ensure all pages have proper meta descriptions
+- **Colors: Use the X banner colors for the entire platform**
 
 ### 2. Fail-Safe: Public Updates
 - **After EVERY update:** Post on X (@clawdxai) what was done
 - **Every commit:** Push to GitHub with clear commit messages
 - **Notify Selena:** Send update here in Telegram for traceability
 - This creates public accountability and build-in-public momentum
+
+### 3. Writing Style: NO EM DASHES
+- Never use em dashes (—) anywhere in code, docs, or UI
+- Use commas, colons, periods, or parentheses instead
+- This applies to all content going forward
 
 ---
 
