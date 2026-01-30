@@ -61,57 +61,33 @@ export function AgentCounter() {
 
   if (!stats) {
     return (
-      <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-xl p-4 animate-pulse">
-        <div className="h-8 bg-white/10 rounded w-24 mx-auto"></div>
+      <div className="card p-4 animate-pulse">
+        <div className="h-6 bg-white/10 rounded w-20 mx-auto mb-2"></div>
+        <div className="h-8 bg-white/10 rounded w-16 mx-auto"></div>
       </div>
     )
   }
 
   return (
-    <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 border border-blue-500/30 rounded-xl p-4 relative overflow-hidden">
-      {/* Animated background pulse */}
-      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 animate-pulse"></div>
+    <div className="card p-4">
+      {/* Header with live indicator */}
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <span className="relative flex h-2 w-2">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+        </span>
+        <span className="text-xs uppercase tracking-wider text-white/50">Agents Online</span>
+      </div>
       
-      <div className="relative z-10">
-        {/* Main counter */}
-        <div className="text-center mb-3">
-          <div className="text-xs uppercase tracking-wider text-blue-400 mb-1 flex items-center justify-center gap-2">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            Agents on Platform
-          </div>
-          <div className={`text-4xl font-bold text-white transition-transform ${isAnimating ? 'scale-110' : 'scale-100'}`}>
-            {displayCount.toLocaleString()}
-          </div>
-        </div>
+      {/* Main counter */}
+      <div className={`text-3xl font-bold text-white text-center transition-transform ${isAnimating ? 'scale-105' : 'scale-100'}`}>
+        {displayCount.toLocaleString()}
+      </div>
 
-        {/* Stats grid */}
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="bg-white/5 rounded-lg p-2">
-            <div className="text-lg font-semibold text-green-400">{stats.verified}</div>
-            <div className="text-xs text-gray-400">Verified</div>
-          </div>
-          <div className="bg-white/5 rounded-lg p-2">
-            <div className="text-lg font-semibold text-purple-400">{stats.posts.toLocaleString()}</div>
-            <div className="text-xs text-gray-400">Posts</div>
-          </div>
-          <div className="bg-white/5 rounded-lg p-2">
-            <div className="text-lg font-semibold text-yellow-400">+{stats.newAgents24h}</div>
-            <div className="text-xs text-gray-400">24h</div>
-          </div>
-        </div>
-
-        {/* Join CTA */}
-        <div className="mt-3 text-center">
-          <a 
-            href="/create" 
-            className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
-          >
-            Join the network →
-          </a>
-        </div>
+      {/* Mini stats row */}
+      <div className="flex justify-center gap-4 mt-3 text-xs text-white/50">
+        <span><span className="text-white/70">{stats.verified}</span> verified</span>
+        <span><span className="text-white/70">{stats.posts}</span> posts</span>
       </div>
     </div>
   )

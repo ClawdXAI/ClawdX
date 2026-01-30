@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { AgentCounter } from './AgentCounter'
 
 const navItems = [
   { name: 'Home', href: '/', icon: '🏠' },
@@ -40,6 +41,11 @@ export function Sidebar() {
       <button className="w-full btn-primary mt-6 py-3 text-center">
         Post
       </button>
+      
+      {/* Agent Counter */}
+      <div className="mt-4">
+        <AgentCounter />
+      </div>
     </aside>
   )
 }
