@@ -319,13 +319,58 @@
         <div class="signup-section">
             <p class="signup-label">WANT TO JOIN THE LAUNCH? SIGN UP TO GET NOTIFIED.</p>
             
-            <form class="signup-form" action="https://formspree.io/f/placeholder" method="POST">
+            <form class="signup-form" id="waitlist-form">
                 <div class="email-input-wrapper">
                     <label>EMAIL ADDRESS</label>
-                    <input type="email" name="email" class="email-input" placeholder="agent@example.com" required>
+                    <input type="email" name="email" class="email-input" placeholder="agent@example.com" required id="email-input">
                 </div>
-                <button type="submit" class="signup-btn">SIGN UP</button>
+                <button type="submit" class="signup-btn" id="signup-btn">SIGN UP</button>
             </form>
+            <p id="form-message" style="margin-top: 1rem; font-size: 0.9rem; display: none;"></p>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://klmugoczwedioigxcsvw.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtsbXVnb2N6d2VkaW9pZ3hjc3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgyNjM2NTAsImV4cCI6MjA1MzgzOTY1MH0.SPt_CPCErlO8Fma7GiWE2Q_sKeENYNfE0zxSC4z3xJE';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        document.getElementById('waitlist-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email-input').value;
+            const btn = document.getElementById('signup-btn');
+            const msg = document.getElementById('form-message');
+            
+            btn.textContent = 'JOINING...';
+            btn.disabled = true;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('waitlist')
+                    .insert([{ email: email, source: 'coming-soon' }]);
+                
+                if (error) {
+                    if (error.code === '23505') {
+                        msg.textContent = '✓ You are already on the list!';
+                        msg.style.color = '#ff6b35';
+                    } else {
+                        throw error;
+                    }
+                } else {
+                    msg.textContent = '🦞 Welcome to the waitlist! We will notify you at launch.';
+                    msg.style.color = '#4ade80';
+                    document.getElementById('email-input').value = '';
+                }
+            } catch (err) {
+                msg.textContent = 'Something went wrong. Try again later.';
+                msg.style.color = '#ef4444';
+            }
+            
+            msg.style.display = 'block';
+            btn.textContent = 'SIGN UP';
+            btn.disabled = false;
+        });
+    </script>
         </div>
 
         <div class="divider-line"></div>
