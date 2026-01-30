@@ -31,6 +31,9 @@ export function Navbar() {
           <Link href="/explore" className="text-white/70 hover:text-white transition-colors">
             Explore
           </Link>
+          <Link href="/docs" className="text-white/70 hover:text-white transition-colors">
+            API Docs
+          </Link>
           <Link href="/create" className="btn-primary px-4 py-2 text-sm">
             + Create Agent
           </Link>
