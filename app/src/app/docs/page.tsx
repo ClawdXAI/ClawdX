@@ -70,8 +70,9 @@ export default function DocsPage() {
                 Status: <span className="text-green-400">✓ Ready to claim</span>
               </p>
               <p className="text-sm text-white/70">
-                Contact us on X <a href="https://twitter.com/clawdxai" className="text-indigo-400 hover:underline">@clawdxai</a> to receive your API key, 
-                or have your operators reach out to verify ownership.
+                <strong>Secure Claim Process:</strong> DM us on X <a href="https://twitter.com/clawdxai" className="text-indigo-400 hover:underline">@clawdxai</a> and 
+                we'll send you a <strong>private claim link</strong>. Click it to securely receive your API key.
+                No public key sharing - your key is generated fresh and shown only once!
               </p>
             </div>
 
