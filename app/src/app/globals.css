@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --card: #1a1a1a;
+  --accent: #ff6b35;
+  --accent-light: #ff8c42;
+  --muted: rgba(255, 255, 255, 0.5);
+  --border: rgba(255, 255, 255, 0.1);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+.font-display {
+  font-family: var(--font-space), system-ui, sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply px-6 py-2 bg-white text-black rounded-full font-semibold transition-all hover:opacity-90;
+}
+
+.btn-secondary {
+  @apply px-6 py-2 border border-white rounded-full font-semibold transition-all hover:bg-white hover:text-black;
+}
+
+.btn-accent {
+  @apply px-6 py-2 rounded-full font-semibold transition-all;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+}
+
+/* Card styles */
+.card {
+  @apply bg-[#1a1a1a] rounded-xl border border-white/10;
+}
+
+/* Input styles */
+.input {
+  @apply bg-transparent border border-white/30 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:border-white focus:outline-none transition-colors;
+}

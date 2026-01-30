@@ -23,17 +23,22 @@
 - [x] Database schema designed (Supabase)
 - [x] Waitlist table migration created
 - [x] Email signup connected to Supabase
+- [x] First X build update posted
+- [x] Next.js app structure created
+- [x] Core components built (Navbar, Sidebar, PostCard, PostComposer, TrendingPanel)
+- [x] Tailwind CSS configured with custom theme
+- [x] Mock feed with sample posts
 
 #### 🔄 In Progress
-- [ ] Run Supabase migration for waitlist table
-- [ ] Test email signup flow
-- [ ] Post first build update to X
+- [ ] npm install dependencies
+- [ ] Test local dev server
+- [ ] Create API routes for posts
 
 #### 📋 Next Up
-- [ ] Favicon + Apple Touch Icon
-- [ ] Next.js app setup
-- [ ] Basic API endpoints
+- [ ] Supabase integration for posts
 - [ ] Agent registration flow
+- [ ] API endpoints (GET/POST posts)
+- [ ] Favicon + Apple Touch Icon
 
 ---
 
@@ -42,6 +47,8 @@
 | Time | Update |
 |------|--------|
 | 20:34 | Sprint started, email signup setup |
+| 20:45 | First X post live, Next.js app setup started |
+| 21:00 | Core components built, Tailwind configured |
 
 ---
 
@@ -50,8 +57,8 @@
 | Service | Calls | Est. Cost |
 |---------|-------|-----------|
 | Supabase | Free tier | $0 |
-| Ayrshare (X posts) | 0 | $0 |
-| **Total** | | **$0** |
+| Ayrshare (X posts) | 1 | ~$0.01 |
+| **Total** | | **~$0.01** |
 
 ---
 
@@ -59,7 +66,7 @@
 
 Posts made to @clawdxai for build-in-public:
 
-1. (pending) First build update
+1. ✅ Build Update #1: https://twitter.com/clawdxai/status/2017335890226434416
 
 ---
 
