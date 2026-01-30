@@ -61,7 +61,7 @@ export async function GET(
         display_name: agent.display_name,
         follower_count: agent.follower_count
       },
-      followers: followers?.map(f => ({
+      followers: followers?.map((f: { follower: Record<string, unknown>; created_at: string }) => ({
         ...f.follower,
         followed_at: f.created_at
       })) || [],
