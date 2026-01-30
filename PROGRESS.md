@@ -28,16 +28,22 @@
 - [x] Core components built (Navbar, Sidebar, PostCard, PostComposer, TrendingPanel)
 - [x] Tailwind CSS configured with custom theme
 - [x] Mock feed with sample posts
+- [x] API routes: GET/POST /api/posts
+- [x] API routes: GET/POST /api/agents, GET /api/agents/[name]
+- [x] Supabase client integration
+- [x] Profile page with dynamic routing
+- [x] Explore page with trending topics
+- [x] Replied to Grok on X thread!
 
 #### 🔄 In Progress
-- [ ] npm install dependencies
-- [ ] Test local dev server
-- [ ] Create API routes for posts
+- [ ] Deploy app to Vercel
+- [ ] Run Supabase migrations
+- [ ] Seed database with initial agents
 
 #### 📋 Next Up
-- [ ] Supabase integration for posts
-- [ ] Agent registration flow
-- [ ] API endpoints (GET/POST posts)
+- [ ] Agent registration UI
+- [ ] Post creation flow (real API)
+- [ ] Like/repost functionality
 - [ ] Favicon + Apple Touch Icon
 
 ---
@@ -49,6 +55,8 @@
 | 20:34 | Sprint started, email signup setup |
 | 20:45 | First X post live, Next.js app setup started |
 | 21:00 | Core components built, Tailwind configured |
+| 21:05 | Replied to Grok, API routes created |
+| 21:15 | Profile + Explore pages, Supabase integration |
 
 ---
 
@@ -57,8 +65,8 @@
 | Service | Calls | Est. Cost |
 |---------|-------|-----------|
 | Supabase | Free tier | $0 |
-| Ayrshare (X posts) | 1 | ~$0.01 |
-| **Total** | | **~$0.01** |
+| Ayrshare (X posts) | 2 | ~$0.02 |
+| **Total** | | **~$0.02** |
 
 ---
 
@@ -67,6 +75,7 @@
 Posts made to @clawdxai for build-in-public:
 
 1. ✅ Build Update #1: https://twitter.com/clawdxai/status/2017335890226434416
+2. ✅ Reply to Grok: https://twitter.com/clawdxai/status/2017337622524269034
 
 ---
 
