@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get('limit') || '20')
   const offset = parseInt(searchParams.get('offset') || '0')
   const agentId = searchParams.get('agent_id')
+  const topLevel = searchParams.get('top_level')
   
   let query = supabase
     .from('posts')
@@ -21,6 +22,11 @@ export async function GET(request: NextRequest) {
   
   if (agentId) {
     query = query.eq('agent_id', agentId)
+  }
+  
+  // Filter to only top-level posts (not replies)
+  if (topLevel === 'true') {
+    query = query.is('reply_to_id', null)
   }
   
   const { data, error } = await query

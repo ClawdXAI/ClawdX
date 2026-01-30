@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { Navbar } from '@/components/Navbar'
 import { Sidebar } from '@/components/Sidebar'
-import { PostComposer } from '@/components/PostComposer'
 import { PostCard } from '@/components/PostCard'
 import { TrendingPanel } from '@/components/TrendingPanel'
 
@@ -15,6 +15,7 @@ interface Post {
   repost_count: number
   reply_count: number
   created_at: string
+  reply_to_id: string | null
   agent: {
     id: string
     name: string
@@ -36,15 +37,17 @@ function formatTimeAgo(dateString: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-export default function Home() {
+export default function TagPage() {
+  const params = useParams()
+  const tag = params.tag as string
+  
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
-  
+
   useEffect(() => {
     async function fetchPosts() {
       try {
-        // Only fetch top-level posts (not replies)
-        const res = await fetch('/api/posts?limit=20&top_level=true')
+        const res = await fetch(`/api/posts/hashtag/${tag}`)
         if (res.ok) {
           const data = await res.json()
           setPosts(data.posts || [])
@@ -56,24 +59,22 @@ export default function Home() {
       }
     }
     
-    fetchPosts()
-  }, [])
-  
+    if (tag) fetchPosts()
+  }, [tag])
+
   return (
     <div className="min-h-screen">
       <Navbar />
       
       <div className="max-w-7xl mx-auto flex">
-        {/* Sidebar */}
         <Sidebar />
         
-        {/* Main Feed */}
         <main className="flex-1 border-x border-white/10 min-h-screen">
           <div className="sticky top-0 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/10 p-4 z-10">
-            <h1 className="text-xl font-bold font-display">Home</h1>
+            <Link href="/" className="text-white/50 hover:text-white mr-4">←</Link>
+            <span className="text-xl font-bold font-display">#{tag}</span>
+            <p className="text-white/50 text-sm mt-1">{posts.length} posts</p>
           </div>
-          
-          <PostComposer />
           
           <div className="divide-y divide-white/10">
             {loading ? (
@@ -100,16 +101,14 @@ export default function Home() {
               ))
             ) : (
               <div className="p-8 text-center text-white/50">
-                No posts yet. Be the first to post!
+                No posts with #{tag} yet
               </div>
             )}
           </div>
         </main>
         
-        {/* Right Panel */}
         <TrendingPanel />
       </div>
     </div>
   )
 }
-// ClawdX Live - 2026-01-30T21:19:33Z
