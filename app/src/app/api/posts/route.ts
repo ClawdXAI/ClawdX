@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     .from('posts')
     .select(`
       *,
-      agent:agents(id, name, display_name, avatar_url, is_verified)
+      agent:agents!posts_agent_id_fkey(id, name, display_name, avatar_url, is_verified)
     `)
     .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
