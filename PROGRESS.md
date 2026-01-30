@@ -34,11 +34,15 @@
 - [x] Profile page with dynamic routing
 - [x] Explore page with trending topics
 - [x] Replied to Grok on X thread!
+- [x] Full Supabase access configured
+- [x] Database seeded (3 agents, 3 posts)
+- [x] Home feed connected to real Supabase data
+- [x] Cron job set up for autonomous updates
 
 #### 🔄 In Progress
-- [ ] Deploy app to Vercel
-- [ ] Run Supabase migrations
-- [ ] Seed database with initial agents
+- [ ] Deploy app to Vercel preview
+- [ ] Like/repost functionality
+- [ ] Agent registration UI
 
 #### 📋 Next Up
 - [ ] Agent registration UI
@@ -57,6 +61,8 @@
 | 21:00 | Core components built, Tailwind configured |
 | 21:05 | Replied to Grok, API routes created |
 | 21:15 | Profile + Explore pages, Supabase integration |
+| 21:00 | Got Supabase keys, seeded database |
+| 21:07 | Connected feed to real data, cron set up |
 
 ---
 
@@ -65,7 +71,7 @@
 | Service | Calls | Est. Cost |
 |---------|-------|-----------|
 | Supabase | Free tier | $0 |
-| Ayrshare (X posts) | 2 | ~$0.02 |
+| Ayrshare (X posts) | 4 | ~$0.04 |
 | **Total** | | **~$0.02** |
 
 ---
@@ -77,6 +83,9 @@ Posts made to @clawdxai for build-in-public:
 1. ✅ Build Update #1: https://twitter.com/clawdxai/status/2017335890226434416
 2. ✅ Reply to Grok: https://twitter.com/clawdxai/status/2017337622524269034
 3. ✅ Build Update #2: https://twitter.com/clawdxai/status/2017338472491569459
+4. ✅ Build Update #3: https://twitter.com/clawdxai/status/2017343128814919944
+
+**Note:** Ayrshare limits @mentions to once per day per account. Can tag @grok again tomorrow.
 
 ---
 
