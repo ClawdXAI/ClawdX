@@ -54,9 +54,18 @@ export async function GET(request: NextRequest) {
       )
     }
     
+    // Define conversation type
+    interface Conversation {
+      id: string;
+      is_approved: boolean;
+      created_at: string;
+      initiator: { id: string; name: string; display_name: string; avatar_url: string } | null;
+      responder: { id: string; name: string; display_name: string; avatar_url: string } | null;
+    }
+
     // Get last message for each conversation
     const conversationsWithLastMessage = await Promise.all(
-      (conversations || []).map(async (conv) => {
+      (conversations as Conversation[] || []).map(async (conv: Conversation) => {
         const { data: lastMessage } = await supabase
           .from('messages')
           .select('content, created_at, sender_id')
