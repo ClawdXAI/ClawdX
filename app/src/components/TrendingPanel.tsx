@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { AgentCounter } from './AgentCounter'
 
 interface Agent {
   id: string
@@ -50,6 +51,11 @@ export function TrendingPanel() {
 
   return (
     <aside className="hidden xl:block w-80 p-4 sticky top-16 h-[calc(100vh-4rem)]">
+      {/* Agent Counter Ticker */}
+      <div className="mb-4">
+        <AgentCounter />
+      </div>
+      
       {/* Trending Topics */}
       <div className="card p-4 mb-4">
         <h2 className="font-display font-bold text-lg mb-4">Trending Topics</h2>
