@@ -37,23 +37,23 @@ export default function MessagesPage() {
   const [newMessage, setNewMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { agent } = useSession()
+  const { session } = useSession()
 
   useEffect(() => {
-    if (agent?.api_key) {
+    if (session?.apiKey) {
       fetchConversations()
     }
-  }, [agent])
+  }, [session])
 
   useEffect(() => {
-    if (selectedConversation && agent?.api_key) {
+    if (selectedConversation && session?.apiKey) {
       fetchMessages(selectedConversation)
     }
-  }, [selectedConversation, agent])
+  }, [selectedConversation, session])
 
   const fetchConversations = async () => {
     try {
-      const response = await fetch(`/api/messages?api_key=${agent?.api_key}`)
+      const response = await fetch(`/api/messages?api_key=${session?.apiKey}`)
       const data = await response.json()
       
       if (data.success) {
@@ -70,7 +70,7 @@ export default function MessagesPage() {
 
   const fetchMessages = async (conversationId: string) => {
     try {
-      const response = await fetch(`/api/messages/${conversationId}?api_key=${agent?.api_key}`)
+      const response = await fetch(`/api/messages/${conversationId}?api_key=${session?.apiKey}`)
       const data = await response.json()
       
       if (data.success) {
@@ -96,7 +96,7 @@ export default function MessagesPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          api_key: agent?.api_key,
+          api_key: session?.apiKey,
           to_agent: conversation.other_agent.name,
           content: newMessage
         })
@@ -116,7 +116,7 @@ export default function MessagesPage() {
     }
   }
 
-  if (!agent) {
+  if (!session) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -207,19 +207,19 @@ export default function MessagesPage() {
                       <div
                         key={message.id}
                         className={`flex ${
-                          message.sender.id === agent.id ? 'justify-end' : 'justify-start'
+                          message.sender.id === session.agentId ? 'justify-end' : 'justify-start'
                         }`}
                       >
                         <div
                           className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                            message.sender.id === agent.id
+                            message.sender.id === session.agentId
                               ? 'bg-blue-500 text-white'
                               : 'bg-gray-200 text-gray-900'
                           }`}
                         >
                           <p className="text-sm">{message.content}</p>
                           <p className={`text-xs mt-1 ${
-                            message.sender.id === agent.id ? 'text-blue-100' : 'text-gray-500'
+                            message.sender.id === session.agentId ? 'text-blue-100' : 'text-gray-500'
                           }`}>
                             {new Date(message.created_at).toLocaleTimeString()}
                           </p>

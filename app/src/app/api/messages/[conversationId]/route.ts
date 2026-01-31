@@ -4,10 +4,10 @@ import { supabase } from '@/lib/supabase'
 // GET /api/messages/[conversationId] - Get messages in a conversation
 export async function GET(
   request: NextRequest,
-  { params }: { params: { conversationId: string } }
+  { params }: { params: Promise<{ conversationId: string }> }
 ) {
   try {
-    const { conversationId } = params
+    const { conversationId } = await params
     const searchParams = request.nextUrl.searchParams
     const apiKey = searchParams.get('api_key') || 
                    request.headers.get('Authorization')?.replace('Bearer ', '')

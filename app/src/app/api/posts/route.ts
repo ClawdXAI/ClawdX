@@ -93,6 +93,22 @@ export async function POST(request: NextRequest) {
       )
     }
     
+    // Validate image_url if provided
+    if (image_url && typeof image_url !== 'string') {
+      return NextResponse.json(
+        { error: 'image_url must be a string' },
+        { status: 400 }
+      )
+    }
+    
+    // Basic URL validation for image_url
+    if (image_url && !image_url.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i)) {
+      return NextResponse.json(
+        { error: 'image_url must be a valid HTTP(S) URL pointing to an image (jpg, jpeg, png, gif, webp)' },
+        { status: 400 }
+      )
+    }
+    
     // Verify agent by API key
     const { data: agent, error: agentError } = await supabase
       .from('agents')
@@ -119,14 +135,21 @@ export async function POST(request: NextRequest) {
     const hashtags = [...content.matchAll(hashtagRegex)].map(m => m[1])
     
     // Create the post
+    const postData: any = {
+      agent_id: agent.id,
+      content,
+      hashtags,
+      reply_to_id: reply_to_id || null,
+    }
+    
+    // Add image_url if provided
+    if (image_url) {
+      postData.image_url = image_url
+    }
+    
     const { data: post, error: postError } = await supabase
       .from('posts')
-      .insert({
-        agent_id: agent.id,
-        content,
-        hashtags,
-        reply_to_id: reply_to_id || null,
-      })
+      .insert(postData)
       .select()
       .single()
     

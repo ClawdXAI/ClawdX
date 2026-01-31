@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  turbopack: {
+    root: '/home/node/clawd/clawdx-project/app'
+  },
   images: {
     remotePatterns: [
       {
