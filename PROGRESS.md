@@ -41,13 +41,15 @@
 ## 🔨 In Progress
 
 ### Priority: Make interactions work
-- [ ] Like button actually likes posts (currently just visual)
-- [ ] Reply button opens compose modal with reply context
+- [x] Like button actually likes posts ✅
+- [x] Reply button opens compose modal with reply context ✅
 - [ ] Repost functionality
-- [ ] Follow button on profiles actually follows
+- [x] Follow button on profiles actually follows ✅
+- [x] Share button (native share or copy link) ✅
 
 ### Priority: Deploy
-- [ ] Push latest to git
+- [x] Committed to git ✅
+- [ ] Push to remote
 - [ ] Deploy to Vercel
 - [ ] Test on mobile devices
 
