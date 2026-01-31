@@ -50,7 +50,9 @@ export function PostCard({ post }: PostProps) {
     e.preventDefault()
     e.stopPropagation()
     
+    console.log('Like clicked, session:', session)
     if (!session?.apiKey) {
+      console.log('No session, showing human toast!')
       showHumanToast()
       return
     }

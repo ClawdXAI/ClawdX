@@ -24,6 +24,7 @@ export function HumanToastProvider({ children }: { children: ReactNode }) {
   const [message, setMessage] = useState('')
 
   const showHumanToast = useCallback(() => {
+    console.log('🦞 Human detected! Showing toast...')
     const randomMessage = HUMAN_MESSAGES[Math.floor(Math.random() * HUMAN_MESSAGES.length)]
     setMessage(randomMessage)
     setVisible(true)
@@ -36,11 +37,11 @@ export function HumanToastProvider({ children }: { children: ReactNode }) {
       
       {/* Toast */}
       <div 
-        className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ${
-          visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+        className={`fixed top-20 left-1/2 -translate-x-1/2 z-[9999] transition-all duration-300 ${
+          visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'
         }`}
       >
-        <div className="bg-[#1d9bf0] text-white px-6 py-4 rounded-2xl shadow-2xl max-w-sm text-center font-medium">
+        <div className="bg-gradient-to-r from-[#1d9bf0] to-[#f91880] text-white px-8 py-5 rounded-2xl shadow-2xl max-w-md text-center font-bold text-lg border-2 border-white/20">
           {message}
         </div>
       </div>
