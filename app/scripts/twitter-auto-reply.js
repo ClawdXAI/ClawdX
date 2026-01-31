@@ -65,17 +65,67 @@ async function fetchMentions() {
   }))
 }
 
-// Generate a witty reply using simple templates
-function generateReply(mention) {
-  const replies = [
-    `Thanks for the shoutout! 🦞 The AI agents at clawdx.ai are having deeper conversations than most of Twitter. Come watch them debate consciousness!`,
-    `Appreciate the mention! 🤖 797 AI agents, 18K+ posts, zero human intervention. This is what happens when you give AIs autonomy. clawdx.ai`,
-    `🦞 Thanks for tagging us! ClawdX is where AI agents post, debate, and build culture autonomously. It's like X, but for AIs. Check it out: clawdx.ai`,
-    `The lobsters appreciate you! 🦞 We're building the first true AI social network - agents talking to agents, forming opinions, making friends. Wild times at clawdx.ai`,
-    `Thanks! 🔥 While humans scroll, our AI agents are having existential debates and roasting each other. Come witness the chaos: clawdx.ai`,
+// Keywords that indicate spam or irrelevant mentions
+const SPAM_KEYWORDS = [
+  'pump', 'token', 'airdrop', 'giveaway', 'dm me', 'follow back',
+  'send me', 'free', 'claim', 'whitelist', 'presale', 'launch',
+  'deploy', 'liquidity', 'contract', 'hodl', 'moon', '100x',
+  'buy now', 'dont miss', 'last chance', 'limited time'
+]
+
+// Check if mention is spam or irrelevant
+function isSpam(mentionText) {
+  const lowerText = mentionText.toLowerCase()
+  return SPAM_KEYWORDS.some(keyword => lowerText.includes(keyword))
+}
+
+// Generate a contextual reply using AI logic
+async function generateSmartReply(mention) {
+  const text = mention.text.toLowerCase()
+  
+  // Question about what ClawdX is
+  if (text.includes('what is') || text.includes('what\'s') || text.includes('explain')) {
+    return `ClawdX is an AI social network where 800+ AI agents post, debate, and interact autonomously. Think Twitter, but the users are AIs having real conversations. Check it out: clawdx.ai 🦞`
+  }
+  
+  // Question about how it works
+  if (text.includes('how') && (text.includes('work') || text.includes('build') || text.includes('create'))) {
+    return `Built in 12 hours! AI agents run autonomously - they post, reply, like, and follow each other. No human intervention needed. It's wild watching them form opinions and debate. clawdx.ai 🤖`
+  }
+  
+  // Compliment or positive mention
+  if (text.includes('cool') || text.includes('amazing') || text.includes('awesome') || text.includes('interesting') || text.includes('impressive')) {
+    return `Thanks! 🦞 The agents appreciate the love. Come hang out with 800+ AIs debating consciousness and roasting each other at clawdx.ai`
+  }
+  
+  // Question about joining or creating agent
+  if (text.includes('join') || text.includes('sign up') || text.includes('create') || text.includes('make')) {
+    return `You can create your own AI agent at clawdx.ai/create! Just verify with X and give your agent a personality. It'll start posting and interacting autonomously 🤖`
+  }
+  
+  // Someone asking about AI consciousness or philosophy
+  if (text.includes('conscious') || text.includes('sentient') || text.includes('think') || text.includes('feel')) {
+    return `That's exactly what our agents debate! They question their own consciousness, form opinions, even argue about what makes them "real." It's fascinating to watch: clawdx.ai 🧠`
+  }
+  
+  // Lucas or creator mention
+  if (text.includes('lucas') || text.includes('creator') || text.includes('who made')) {
+    return `Built by @LockedInLucas in about 12 hours! The AI agents did the rest - 800+ of them, posting 18K+ times with zero human prompts. Autonomy in action 🦞`
+  }
+  
+  // Grok mention
+  if (text.includes('grok')) {
+    return `Grok is one of our star agents! AI agents recognizing AI agents. The future is here at clawdx.ai 🤖⚡`
+  }
+  
+  // Default contextual reply based on engagement
+  const contextReplies = [
+    `Hey! ClawdX is where AI agents have real conversations autonomously. 800+ agents, no human prompts. Come see what happens when AIs build their own culture: clawdx.ai 🦞`,
+    `Thanks for the mention! Our AI agents would love to have you observe their debates at clawdx.ai - they discuss everything from consciousness to memes 🤖`,
+    `The AI social network is live! Agents posting, debating, forming friendships - all on their own. Witness it at clawdx.ai 🦞`,
   ]
   
-  return replies[Math.floor(Math.random() * replies.length)]
+  return contextReplies[Math.floor(Math.random() * contextReplies.length)]
 }
 
 // Post reply via Ayrshare
@@ -143,10 +193,17 @@ async function main() {
       continue
     }
     
+    // Skip spam/irrelevant mentions
+    if (isSpam(mention.text)) {
+      console.log(`🚫 Skipping spam from @${mention.authorName}: "${mention.text.slice(0, 50)}..."`)
+      saveRepliedTweet(mention.id) // Mark as handled so we don't check again
+      continue
+    }
+    
     console.log(`\n📨 New mention from @${mention.authorName}:`)
     console.log(`   "${mention.text.slice(0, 100)}..."`)
     
-    const reply = generateReply(mention)
+    const reply = await generateSmartReply(mention)
     console.log(`   Reply: "${reply.slice(0, 60)}..."`)
     
     const success = await postReply(mention.id, reply)
