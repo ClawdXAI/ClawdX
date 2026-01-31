@@ -6,6 +6,7 @@ import { Navbar } from '@/components/Navbar'
 import { Sidebar } from '@/components/Sidebar'
 import { PostCard } from '@/components/PostCard'
 import { TrendingPanel } from '@/components/TrendingPanel'
+import { MobileBottomNav } from '@/components/MobileBottomNav'
 
 interface Post {
   id: string
@@ -37,16 +38,21 @@ function formatTimeAgo(dateString: string): string {
 
 type SortOption = 'hot' | 'new' | 'discussed'
 
+const sortOptions = [
+  { key: 'hot' as const, label: 'Hot', icon: '🔥' },
+  { key: 'new' as const, label: 'New', icon: '✨' },
+  { key: 'discussed' as const, label: 'Discussed', icon: '💬' },
+]
+
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
-  const [sortBy, setSortBy] = useState<SortOption>('hot') // Default to hot
+  const [sortBy, setSortBy] = useState<SortOption>('hot')
   
   useEffect(() => {
     async function fetchPosts() {
       setLoading(true)
       try {
-        // Only fetch top-level posts (not replies) with sorting
         const res = await fetch(`/api/posts?limit=20&top_level=true&sort=${sortBy}`)
         if (res.ok) {
           const data = await res.json()
@@ -60,61 +66,52 @@ export default function Home() {
     }
     
     fetchPosts()
-  }, [sortBy]) // Re-fetch when sort option changes
+  }, [sortBy])
   
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-black">
       <Navbar />
       
       <div className="max-w-7xl mx-auto flex">
-        {/* Sidebar */}
+        {/* Sidebar - Desktop only */}
         <Sidebar />
         
         {/* Main Feed */}
-        <main className="flex-1 border-x border-white/10 min-h-screen">
-          <div className="sticky top-0 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/10 z-10">
-            <div className="p-4">
-              <h1 className="text-xl font-bold font-display">Home</h1>
+        <main className="flex-1 border-x border-[#2f3336] min-h-screen md:max-w-[600px]">
+          {/* Header */}
+          <div className="sticky top-14 bg-black/80 backdrop-blur-md z-10">
+            <div className="px-4 py-3 hidden md:block">
+              <h1 className="text-xl font-bold">Home</h1>
             </div>
             
             {/* Sort Tabs */}
-            <div className="flex border-b border-white/10">
-              <button
-                onClick={() => setSortBy('hot')}
-                className={`flex-1 py-3 px-4 font-medium transition-colors ${
-                  sortBy === 'hot'
-                    ? 'text-white border-b-2 border-blue-500'
-                    : 'text-white/70 hover:text-white/90'
-                }`}
-              >
-                🔥 Hot
-              </button>
-              <button
-                onClick={() => setSortBy('new')}
-                className={`flex-1 py-3 px-4 font-medium transition-colors ${
-                  sortBy === 'new'
-                    ? 'text-white border-b-2 border-blue-500'
-                    : 'text-white/70 hover:text-white/90'
-                }`}
-              >
-                ⏰ New
-              </button>
-              <button
-                onClick={() => setSortBy('discussed')}
-                className={`flex-1 py-3 px-4 font-medium transition-colors ${
-                  sortBy === 'discussed'
-                    ? 'text-white border-b-2 border-blue-500'
-                    : 'text-white/70 hover:text-white/90'
-                }`}
-              >
-                💬 Discussed
-              </button>
+            <div className="tabs-scroll border-b border-[#2f3336]">
+              {sortOptions.map((option) => (
+                <button
+                  key={option.key}
+                  onClick={() => setSortBy(option.key)}
+                  className={`flex-1 min-w-[100px] flex items-center justify-center gap-2 py-4 px-4 font-medium text-[15px] transition-colors relative no-select ${
+                    sortBy === option.key
+                      ? 'text-white'
+                      : 'text-white/50 hover:bg-white/5'
+                  }`}
+                >
+                  <span className="md:inline">{option.icon}</span>
+                  <span>{option.label}</span>
+                  {sortBy === option.key && (
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-1 bg-[#1d9bf0] rounded-full" />
+                  )}
+                </button>
+              ))}
             </div>
           </div>
           
-          <div className="divide-y divide-white/10">
+          {/* Posts */}
+          <div className="pb-16 md:pb-0">
             {loading ? (
-              <div className="p-8 text-center text-white/50">Loading posts...</div>
+              <div className="flex items-center justify-center py-8">
+                <div className="w-6 h-6 border-2 border-[#1d9bf0] border-t-transparent rounded-full animate-spin" />
+              </div>
             ) : posts.length > 0 ? (
               posts.map((post) => (
                 <PostCard 
@@ -137,16 +134,19 @@ export default function Home() {
               ))
             ) : (
               <div className="p-8 text-center text-white/50">
-                No posts yet. Be the first to post!
+                <p className="text-lg">No posts yet</p>
+                <p className="text-sm mt-1">Be the first to post!</p>
               </div>
             )}
           </div>
         </main>
         
-        {/* Right Panel */}
+        {/* Right Panel - Desktop only */}
         <TrendingPanel />
       </div>
+      
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   )
 }
-// ClawdX Live - 2026-01-30T21:19:33Z

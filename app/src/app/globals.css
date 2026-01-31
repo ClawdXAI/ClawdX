@@ -3,41 +3,69 @@
 @tailwind utilities;
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ffffff;
-  --card: #1a1a1a;
-  --accent: #ff6b35;
-  --accent-light: #ff8c42;
-  --muted: rgba(255, 255, 255, 0.5);
-  --border: rgba(255, 255, 255, 0.1);
+  --background: #000000;
+  --foreground: #e7e9ea;
+  --card: #16181c;
+  --accent: #1d9bf0;
+  --accent-light: #1a8cd8;
+  --muted: rgba(231, 233, 234, 0.5);
+  --border: rgba(47, 51, 54, 1);
+  --x-green: #00ba7c;
+  --x-pink: #f91880;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), system-ui, sans-serif;
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .font-display {
   font-family: var(--font-space), system-ui, sans-serif;
 }
 
-/* Custom scrollbar */
+/* Safe area for iOS bottom nav */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Mobile bottom padding for content with bottom nav */
+@media (max-width: 767px) {
+  .pb-mobile-nav {
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom, 0));
+  }
+}
+
+/* Custom scrollbar - X style */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 16px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--background);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
+  background: rgba(91, 112, 131, 0.4);
+  border: 4px solid var(--background);
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(91, 112, 131, 0.6);
+}
+
+/* Hide scrollbar on mobile */
+@media (max-width: 767px) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  body {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Gradient text */
@@ -48,26 +76,153 @@ body {
   background-clip: text;
 }
 
-/* Button styles */
+/* Button styles - X style */
 .btn-primary {
-  @apply px-6 py-2 bg-white text-black rounded-full font-semibold transition-all hover:opacity-90;
+  @apply px-4 py-2 bg-white text-black rounded-full font-bold text-[15px] transition-all;
+}
+
+.btn-primary:hover {
+  @apply bg-white/90;
+}
+
+.btn-primary:active {
+  @apply bg-white/80;
 }
 
 .btn-secondary {
-  @apply px-6 py-2 border border-white rounded-full font-semibold transition-all hover:bg-white hover:text-black;
+  @apply px-4 py-2 border border-white/30 rounded-full font-bold text-[15px] transition-all;
+}
+
+.btn-secondary:hover {
+  @apply bg-white/10;
 }
 
 .btn-accent {
-  @apply px-6 py-2 rounded-full font-semibold transition-all;
-  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  @apply px-4 py-2 rounded-full font-bold text-[15px] transition-all;
+  background: var(--accent);
+}
+
+.btn-accent:hover {
+  background: var(--accent-light);
 }
 
 /* Card styles */
 .card {
-  @apply bg-[#1a1a1a] rounded-xl border border-white/10;
+  @apply bg-[#16181c] rounded-2xl border border-white/10;
 }
 
-/* Input styles */
+/* Input styles - X style */
 .input {
-  @apply bg-transparent border border-white/30 rounded-lg px-4 py-3 text-white placeholder:text-white/30 focus:border-white focus:outline-none transition-colors;
+  @apply bg-transparent border border-[#2f3336] rounded-lg px-4 py-3 text-white placeholder:text-white/50 focus:border-[#1d9bf0] focus:outline-none focus:ring-1 focus:ring-[#1d9bf0] transition-colors;
+}
+
+/* Touch target minimum - 44px for mobile */
+@media (max-width: 767px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* X-style text colors */
+.text-secondary {
+  color: rgb(113, 118, 123);
+}
+
+/* Active states for mobile */
+@media (max-width: 767px) {
+  .active\:scale-95:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Hide desktop sidebar on mobile, show on lg */
+@media (max-width: 1023px) {
+  .lg\:block {
+    display: none !important;
+  }
+}
+
+/* Trending panel - hide on smaller screens */
+@media (max-width: 1279px) {
+  .xl\:block {
+    display: none !important;
+  }
+}
+
+/* Sort tabs horizontal scroll on mobile */
+.tabs-scroll {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Prevent text selection on interactive elements */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth transitions */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Post card hover states */
+@media (hover: hover) {
+  .hover-highlight:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Link styling */
+a {
+  text-decoration: none;
+}
+
+/* Responsive text */
+@media (max-width: 767px) {
+  .text-responsive {
+    font-size: 15px;
+    line-height: 1.3125;
+  }
+}
+
+/* X-style separator */
+.separator {
+  border-color: rgb(47, 51, 54);
+}
+
+/* Mobile menu overlay */
+.menu-overlay {
+  background: rgba(91, 112, 131, 0.4);
+}
+
+/* Animation for menus */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.15s ease-out;
 }

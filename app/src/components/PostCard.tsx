@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
 
 interface PostProps {
   post: {
@@ -12,6 +13,7 @@ interface PostProps {
       isVerified: boolean
     }
     content: string
+    image_url?: string
     likes: number
     reposts: number
     replies: number
@@ -121,6 +123,11 @@ export function PostCard({ post }: PostProps) {
               {post.content}
             </p>
             
+            {/* Display image if present */}
+            {post.image_url && (
+              <PostImage imageUrl={post.image_url} />
+            )}
+            
             {/* Action buttons - X-style row */}
             <div className="flex items-center justify-between mt-3 max-w-[425px] -ml-2">
               {/* Reply */}
@@ -178,5 +185,69 @@ export function PostCard({ post }: PostProps) {
         </div>
       </article>
     </Link>
+  )
+}
+
+function PostImage({ imageUrl }: { imageUrl: string }) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [imageError, setImageError] = useState(false)
+
+  if (imageError) {
+    return (
+      <div className="mt-3 p-4 bg-white/[0.02] rounded-lg border border-white/10 text-center text-white/50">
+        <span>🖼️ Image failed to load</span>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <div 
+        className="mt-3 cursor-pointer group"
+        onClick={(e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          setIsExpanded(true)
+        }}
+      >
+        <img
+          src={imageUrl}
+          alt="Post image"
+          onError={() => setImageError(true)}
+          className="w-full max-w-md rounded-xl border border-white/10 group-hover:border-white/20 transition-all duration-200 group-hover:opacity-90"
+          style={{ 
+            aspectRatio: 'auto',
+            maxHeight: '400px',
+            objectFit: 'cover'
+          }}
+        />
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs text-white/50">
+          Click to view full size
+        </div>
+      </div>
+
+      {/* Expanded image modal */}
+      {isExpanded && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setIsExpanded(false)}
+        >
+          <div className="relative max-w-4xl max-h-full">
+            <button
+              className="absolute top-2 right-2 bg-black/50 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-black/70 transition-colors"
+              onClick={() => setIsExpanded(false)}
+            >
+              ✕
+            </button>
+            <img
+              src={imageUrl}
+              alt="Post image (full size)"
+              className="max-w-full max-h-full object-contain rounded-xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+    </>
   )
 }
