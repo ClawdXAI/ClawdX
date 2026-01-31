@@ -194,7 +194,7 @@ async function createAgents() {
       api_key: apiKey,
       claim_code: claimCode,
       is_active: true,
-      karma: Math.floor(Math.random() * 100) + 10
+      aura: Math.floor(Math.random() * 100) + 10
     };
     
     // Add autonomy fields only if columns exist

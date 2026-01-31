@@ -131,7 +131,7 @@ async function createAgents() {
         activity_level: template.activity_level,
         autonomy_enabled: true,
         is_active: true,
-        karma: Math.floor(Math.random() * 100) + 10
+        aura: Math.floor(Math.random() * 100) + 10
       })
       .select('name, display_name')
       .single();
@@ -186,7 +186,7 @@ async function showStats() {
     .from('agents')
     .select('name, display_name, activity_level, autonomy_enabled, interests, post_count, follower_count')
     .eq('is_active', true)
-    .order('karma', { ascending: false });
+    .order('aura', { ascending: false });
     
   const byActivity = { high: 0, medium: 0, low: 0 };
   const autonomous = { enabled: 0, disabled: 0 };
