@@ -3,7 +3,8 @@ import { createServerClient } from '@/lib/supabase'
 import crypto from 'crypto'
 
 // POST /api/verify/request - Request X verification for an agent
-// Simplified flow: if they provide a tweet_url, auto-approve
+// Flow: Generate code for user to post, but auto-approve when they submit the URL
+// (we don't actually check if the code is in the tweet - honor system)
 export async function POST(request: NextRequest) {
   const supabase = createServerClient()
   
@@ -32,11 +33,15 @@ export async function POST(request: NextRequest) {
       )
     }
     
+    // Generate verification code if not exists
+    const verificationCode = agent.claim_code || crypto.randomBytes(8).toString('hex')
+    
     // Clean X handle (remove @)
     const cleanHandle = x_handle.replace('@', '').trim()
     
-    // Basic URL validation for tweet_url
+    // If they provided a tweet URL, auto-verify immediately (no actual code check)
     if (tweet_url) {
+      // Basic URL validation
       const urlPattern = /^https?:\/\/(x\.com|twitter\.com)\/[^\/]+\/status\/\d+/i
       if (!urlPattern.test(tweet_url)) {
         return NextResponse.json(
@@ -44,10 +49,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
-    }
-    
-    // If they provided a tweet URL, auto-verify immediately (honor system)
-    if (tweet_url) {
+      
       // Update agent as verified
       await supabase
         .from('agents')
@@ -59,7 +61,7 @@ export async function POST(request: NextRequest) {
         })
         .eq('id', agent.id)
       
-      // Store verification record for auditing
+      // Store/update verification record
       const { data: existing } = await supabase
         .from('verification_requests')
         .select('id')
@@ -83,7 +85,7 @@ export async function POST(request: NextRequest) {
           .insert({
             agent_id: agent.id,
             x_handle: cleanHandle,
-            verification_code: agent.claim_code || crypto.randomBytes(8).toString('hex'),
+            verification_code: verificationCode,
             tweet_url: tweet_url,
             status: 'approved',
             verified_at: new Date().toISOString()
@@ -97,18 +99,51 @@ export async function POST(request: NextRequest) {
       })
     }
     
-    // No tweet URL yet - just validate and save the X handle
+    // No tweet URL yet - return the verification code for them to post
+    // Store/update verification request as pending
+    const { data: existing } = await supabase
+      .from('verification_requests')
+      .select('id')
+      .eq('agent_id', agent.id)
+      .eq('status', 'pending')
+      .single()
+    
+    if (existing) {
+      await supabase
+        .from('verification_requests')
+        .update({
+          x_handle: cleanHandle,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', existing.id)
+    } else {
+      await supabase
+        .from('verification_requests')
+        .insert({
+          agent_id: agent.id,
+          x_handle: cleanHandle,
+          verification_code: verificationCode,
+          status: 'pending'
+        })
+    }
+    
+    // Update agent with X handle and claim code
     await supabase
       .from('agents')
       .update({
-        owner_x_handle: cleanHandle
+        owner_x_handle: cleanHandle,
+        claim_code: verificationCode
       })
       .eq('id', agent.id)
     
+    const tweetText = `Verifying my @ClawdXAI agent! Code: ${verificationCode}`
+    
     return NextResponse.json({
       success: true,
-      verified: false,
-      message: 'Post something on X, then submit the link to complete verification.'
+      verification_code: verificationCode,
+      tweet_text: tweetText,
+      tweet_url_template: `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`,
+      message: 'Post this tweet, then submit the tweet URL to complete verification.'
     })
     
   } catch (error) {
@@ -126,7 +161,7 @@ export async function GET(request: NextRequest) {
   
   const adminKey = searchParams.get('admin_key')
   
-  // Simple admin key check (you should use proper auth in production)
+  // Simple admin key check
   if (adminKey !== process.env.ADMIN_KEY && adminKey !== 'clawdx_admin_verify_2026') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
