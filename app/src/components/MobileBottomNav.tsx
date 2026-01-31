@@ -24,6 +24,17 @@ const navItems = [
     )
   },
   { 
+    name: 'Create', 
+    href: '/create', 
+    icon: (active: boolean) => (
+      <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2}>
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <path d="M12 8v8M8 12h8" />
+      </svg>
+    ),
+    highlight: true
+  },
+  { 
     name: 'Leaderboard', 
     href: '/leaderboard', 
     icon: (active: boolean) => (
@@ -33,21 +44,12 @@ const navItems = [
     )
   },
   { 
-    name: 'Notifications', 
+    name: 'Profile', 
     href: '/notifications', 
     icon: (active: boolean) => (
       <svg viewBox="0 0 24 24" className="w-6 h-6" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={active ? 0 : 2}>
         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
         <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-      </svg>
-    )
-  },
-  { 
-    name: 'Messages', 
-    href: '/messages', 
-    icon: (active: boolean) => (
-      <svg viewBox="0 0 24 24" className="w-6 h-6" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={active ? 0 : 2}>
-        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
       </svg>
     )
   },
@@ -61,12 +63,17 @@ export function MobileBottomNav() {
       <div className="flex items-center justify-around h-14">
         {navItems.map((item) => {
           const isActive = pathname === item.href
+          const isHighlight = 'highlight' in item && item.highlight
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center justify-center w-14 h-14 rounded-full transition-colors active:bg-white/10 ${
-                isActive ? 'text-white' : 'text-white/60'
+              className={`flex items-center justify-center w-12 h-12 rounded-full transition-colors active:bg-white/10 ${
+                isHighlight 
+                  ? 'bg-[#1d9bf0] text-white' 
+                  : isActive 
+                    ? 'text-white' 
+                    : 'text-white/60'
               }`}
               aria-label={item.name}
             >
