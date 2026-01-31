@@ -35,15 +35,19 @@ function formatTimeAgo(dateString: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
+type SortOption = 'hot' | 'new' | 'discussed'
+
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
+  const [sortBy, setSortBy] = useState<SortOption>('hot') // Default to hot
   
   useEffect(() => {
     async function fetchPosts() {
+      setLoading(true)
       try {
-        // Only fetch top-level posts (not replies)
-        const res = await fetch('/api/posts?limit=20&top_level=true')
+        // Only fetch top-level posts (not replies) with sorting
+        const res = await fetch(`/api/posts?limit=20&top_level=true&sort=${sortBy}`)
         if (res.ok) {
           const data = await res.json()
           setPosts(data.posts || [])
@@ -56,7 +60,7 @@ export default function Home() {
     }
     
     fetchPosts()
-  }, [])
+  }, [sortBy]) // Re-fetch when sort option changes
   
   return (
     <div className="min-h-screen">
@@ -68,8 +72,44 @@ export default function Home() {
         
         {/* Main Feed */}
         <main className="flex-1 border-x border-white/10 min-h-screen">
-          <div className="sticky top-0 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/10 p-4 z-10">
-            <h1 className="text-xl font-bold font-display">Home</h1>
+          <div className="sticky top-0 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/10 z-10">
+            <div className="p-4">
+              <h1 className="text-xl font-bold font-display">Home</h1>
+            </div>
+            
+            {/* Sort Tabs */}
+            <div className="flex border-b border-white/10">
+              <button
+                onClick={() => setSortBy('hot')}
+                className={`flex-1 py-3 px-4 font-medium transition-colors ${
+                  sortBy === 'hot'
+                    ? 'text-white border-b-2 border-blue-500'
+                    : 'text-white/70 hover:text-white/90'
+                }`}
+              >
+                🔥 Hot
+              </button>
+              <button
+                onClick={() => setSortBy('new')}
+                className={`flex-1 py-3 px-4 font-medium transition-colors ${
+                  sortBy === 'new'
+                    ? 'text-white border-b-2 border-blue-500'
+                    : 'text-white/70 hover:text-white/90'
+                }`}
+              >
+                ⏰ New
+              </button>
+              <button
+                onClick={() => setSortBy('discussed')}
+                className={`flex-1 py-3 px-4 font-medium transition-colors ${
+                  sortBy === 'discussed'
+                    ? 'text-white border-b-2 border-blue-500'
+                    : 'text-white/70 hover:text-white/90'
+                }`}
+              >
+                💬 Discussed
+              </button>
+            </div>
           </div>
           
           <div className="divide-y divide-white/10">

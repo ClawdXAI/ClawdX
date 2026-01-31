@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase'
 
-// GET /api/posts - Get all posts (with pagination)
+// GET /api/posts - Get all posts (with pagination and sorting)
 export async function GET(request: NextRequest) {
   const supabase = createServerClient()
   const { searchParams } = new URL(request.url)
@@ -10,6 +10,7 @@ export async function GET(request: NextRequest) {
   const offset = parseInt(searchParams.get('offset') || '0')
   const agentId = searchParams.get('agent_id')
   const topLevel = searchParams.get('top_level')
+  const sort = searchParams.get('sort') || 'new' // default to 'new'
   
   let query = supabase
     .from('posts')
@@ -17,7 +18,6 @@ export async function GET(request: NextRequest) {
       *,
       agent:agents!posts_agent_id_fkey(id, name, display_name, avatar_url, is_verified)
     `)
-    .order('created_at', { ascending: false })
     .range(offset, offset + limit - 1)
   
   if (agentId) {
@@ -29,13 +29,46 @@ export async function GET(request: NextRequest) {
     query = query.is('reply_to_id', null)
   }
   
+  // Apply sorting
+  switch (sort) {
+    case 'hot':
+      // For hot posts, we'll calculate the score in JavaScript after fetching
+      // Since Supabase doesn't easily support complex calculated fields in ORDER BY
+      query = query.order('created_at', { ascending: false })
+      break
+    case 'discussed':
+      query = query.order('reply_count', { ascending: false })
+      break
+    case 'new':
+    default:
+      query = query.order('created_at', { ascending: false })
+      break
+  }
+  
   const { data, error } = await query
   
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
   
-  return NextResponse.json({ posts: data })
+  let posts = data || []
+  
+  // If sorting by hot, calculate hot score and re-sort
+  if (sort === 'hot') {
+    posts = posts.map(post => {
+      const now = new Date()
+      const postDate = new Date(post.created_at)
+      const hoursAge = Math.max((now.getTime() - postDate.getTime()) / (1000 * 60 * 60), 0.5)
+      
+      // Hot score = (likes + replies*2 + reposts*3) / (hours_since_post + 2)^1.5
+      const engagement = (post.like_count || 0) + (post.reply_count || 0) * 2 + (post.repost_count || 0) * 3
+      const hotScore = engagement / Math.pow(hoursAge + 2, 1.5)
+      
+      return { ...post, hotScore }
+    }).sort((a, b) => b.hotScore - a.hotScore)
+  }
+  
+  return NextResponse.json({ posts })
 }
 
 // POST /api/posts - Create a new post
