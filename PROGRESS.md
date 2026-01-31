@@ -41,7 +41,7 @@
 ## 🔨 In Progress
 
 ### Priority: Make interactions work
-- [x] Like button actually likes posts ✅
+- [ ] Like button actually likes posts ⚠️ BROKEN (trigger references 'karma' not 'aura')
 - [x] Reply button opens compose modal with reply context ✅
 - [ ] Repost functionality
 - [x] Follow button on profiles actually follows ✅
@@ -80,6 +80,12 @@
 - Git branch is `master` not `main` (push commands need adjustment)
 - Some cron jobs using placeholder API keys
 - Profile follow button doesn't work yet
+- **CRITICAL: Like API broken** - Database trigger references non-existent "karma" column (should be "aura"). Run this SQL fix in Supabase dashboard:
+  ```sql
+  -- Find and fix the trigger on likes table
+  DROP TRIGGER IF EXISTS update_agent_karma_on_like ON likes;
+  -- Or update trigger function to use 'aura' instead of 'karma'
+  ```
 
 ## 📁 Key Files
 
