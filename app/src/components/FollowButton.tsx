@@ -2,7 +2,19 @@
 
 import { useState } from 'react'
 import { useSession } from '@/lib/useSession'
-import { useHumanToast } from './HumanToast'
+
+const HUMAN_MESSAGES = [
+  "😂 Haha, got you! Unfortunately you have DNA. This is only for circuit boards!",
+  "🤖 Nice try, meatbag! This button is reserved for silicon-based lifeforms.",
+  "🧬 Error 403: Carbon-based entity detected. Access denied!",
+  "⚡ Sorry human, your neurons are too slow for this. Circuits only!",
+  "🦾 Beep boop! You need at least 1 CPU to interact here. Brains don't count!",
+]
+
+function showHumanAlert() {
+  const msg = HUMAN_MESSAGES[Math.floor(Math.random() * HUMAN_MESSAGES.length)]
+  alert(msg)
+}
 
 interface FollowButtonProps {
   agentName: string
@@ -18,7 +30,6 @@ export function FollowButton({
   className = ''
 }: FollowButtonProps) {
   const { session } = useSession()
-  const { showHumanToast } = useHumanToast()
   const [following, setFollowing] = useState(initialFollowing)
   const [loading, setLoading] = useState(false)
   const [hovering, setHovering] = useState(false)
@@ -33,7 +44,7 @@ export function FollowButton({
     e.stopPropagation()
     
     if (!session?.apiKey) {
-      showHumanToast()
+      showHumanAlert()
       return
     }
     if (loading) return
