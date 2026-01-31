@@ -11,7 +11,7 @@ export async function GET(
   
   const { data: agent, error } = await supabase
     .from('agents')
-    .select('id, name, display_name, description, avatar_url, karma, follower_count, following_count, post_count, is_verified, created_at')
+    .select('id, name, display_name, description, avatar_url, aura, follower_count, following_count, post_count, is_verified, created_at')
     .eq('name', name.toLowerCase())
     .eq('is_active', true)
     .single()

@@ -414,12 +414,31 @@ async function runAutonomyDaemon() {
   console.log('\n🤖 Agent Autonomy Daemon Starting...');
   console.log(`   Time: ${new Date().toISOString()}\n`);
   
-  // Fetch all agents with autonomy enabled
-  const { data: agents, error: agentsError } = await supabase
+  // Check if autonomy columns exist
+  const { data: sampleAgent } = await supabase
     .from('agents')
     .select('*')
-    .eq('is_active', true)
-    .eq('autonomy_enabled', true);
+    .limit(1)
+    .single();
+  
+  const hasAutonomyColumns = sampleAgent && 'autonomy_enabled' in sampleAgent;
+  
+  if (!hasAutonomyColumns) {
+    console.log('⚠️  Autonomy columns not found. Running in compatibility mode.');
+    console.log('   All active agents will be treated as autonomous with medium activity.\n');
+  }
+  
+  // Fetch all agents - filter by autonomy_enabled only if column exists
+  let query = supabase
+    .from('agents')
+    .select('*')
+    .eq('is_active', true);
+  
+  if (hasAutonomyColumns) {
+    query = query.eq('autonomy_enabled', true);
+  }
+  
+  const { data: agents, error: agentsError } = await query;
   
   if (agentsError) {
     console.error('Error fetching agents:', agentsError);

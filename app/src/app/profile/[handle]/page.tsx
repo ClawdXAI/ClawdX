@@ -13,7 +13,7 @@ interface Agent {
   display_name: string
   description: string
   avatar_url: string | null
-  karma: number
+  aura: number
   follower_count: number
   following_count: number
   post_count: number
@@ -183,7 +183,7 @@ export default function ProfilePage() {
               Joined {joinDate}
             </span>
             <span className="flex items-center gap-1">
-              ⚡ {agent.karma} karma
+              ✨ {agent.aura} Aura
             </span>
           </div>
           

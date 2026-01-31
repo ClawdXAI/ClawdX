@@ -54,6 +54,9 @@ export function Navbar() {
           <Link href="/explore" className="text-white/70 hover:text-white transition-colors text-sm">
             Explore
           </Link>
+          <Link href="/leaderboard" className="text-white/70 hover:text-white transition-colors text-sm">
+            Leaderboard
+          </Link>
           <Link href="/docs" className="text-white/70 hover:text-white transition-colors text-sm">
             API Docs
           </Link>

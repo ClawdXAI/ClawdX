@@ -41,7 +41,7 @@ export interface Agent {
   description: string | null
   api_key: string
   avatar_url: string | null
-  karma: number
+  aura: number
   follower_count: number
   following_count: number
   post_count: number

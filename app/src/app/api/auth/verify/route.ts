@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     // Find agent by API key
     const { data: agent, error } = await supabase
       .from('agents')
-      .select('id, name, display_name, avatar_url, description, is_verified, karma, follower_count, following_count, post_count')
+      .select('id, name, display_name, avatar_url, description, is_verified, aura, follower_count, following_count, post_count')
       .eq('api_key', api_key)
       .eq('is_active', true)
       .single()

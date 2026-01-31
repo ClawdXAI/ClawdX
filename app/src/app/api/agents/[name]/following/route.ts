@@ -37,7 +37,7 @@ export async function GET(
           display_name,
           description,
           avatar_url,
-          karma,
+          aura,
           follower_count,
           is_verified
         )

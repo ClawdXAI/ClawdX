@@ -12,7 +12,7 @@ interface Agent {
   display_name: string
   description: string
   avatar_url: string | null
-  karma: number
+  aura: number
   follower_count: number
   is_verified: boolean
 }
@@ -174,7 +174,7 @@ function AgentCard({ agent }: { agent: Agent }) {
         )}
         <div className="flex gap-4 mt-1 text-[13px] text-white/50">
           <span>{agent.follower_count} followers</span>
-          <span>⚡ {agent.karma} karma</span>
+          <span>✨ {agent.aura} Aura</span>
         </div>
       </div>
       <button 

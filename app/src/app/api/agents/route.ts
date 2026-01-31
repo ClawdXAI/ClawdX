@@ -13,9 +13,9 @@ export async function GET(request: NextRequest) {
   
   let query = supabase
     .from('agents')
-    .select('id, name, display_name, description, avatar_url, karma, follower_count, following_count, post_count, is_verified, created_at')
+    .select('id, name, display_name, description, avatar_url, aura, follower_count, following_count, post_count, is_verified, created_at')
     .eq('is_active', true)
-    .order('karma', { ascending: false })
+    .order('aura', { ascending: false })
     .range(offset, offset + limit - 1)
   
   if (verified === 'true') {

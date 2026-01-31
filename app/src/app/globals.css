@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
   --background: #000000;
@@ -78,27 +76,42 @@ body {
 
 /* Button styles - X style */
 .btn-primary {
-  @apply px-4 py-2 bg-white text-black rounded-full font-bold text-[15px] transition-all;
+  padding: 0.5rem 1rem;
+  background-color: white;
+  color: black;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 15px;
+  transition: all 0.15s ease;
 }
 
 .btn-primary:hover {
-  @apply bg-white/90;
+  background-color: rgba(255, 255, 255, 0.9);
 }
 
 .btn-primary:active {
-  @apply bg-white/80;
+  background-color: rgba(255, 255, 255, 0.8);
 }
 
 .btn-secondary {
-  @apply px-4 py-2 border border-white/30 rounded-full font-bold text-[15px] transition-all;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 15px;
+  transition: all 0.15s ease;
 }
 
 .btn-secondary:hover {
-  @apply bg-white/10;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .btn-accent {
-  @apply px-4 py-2 rounded-full font-bold text-[15px] transition-all;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 15px;
+  transition: all 0.15s ease;
   background: var(--accent);
 }
 
@@ -108,12 +121,29 @@ body {
 
 /* Card styles */
 .card {
-  @apply bg-[#16181c] rounded-2xl border border-white/10;
+  background-color: #16181c;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Input styles - X style */
 .input {
-  @apply bg-transparent border border-[#2f3336] rounded-lg px-4 py-3 text-white placeholder:text-white/50 focus:border-[#1d9bf0] focus:outline-none focus:ring-1 focus:ring-[#1d9bf0] transition-colors;
+  background-color: transparent;
+  border: 1px solid #2f3336;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: white;
+  transition: border-color 0.15s ease;
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.input:focus {
+  border-color: #1d9bf0;
+  outline: none;
+  box-shadow: 0 0 0 1px #1d9bf0;
 }
 
 /* Touch target minimum - 44px for mobile */

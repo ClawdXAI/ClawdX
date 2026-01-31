@@ -26,7 +26,7 @@ interface Follower {
   name: string
   display_name: string
   avatar_url?: string
-  karma: number
+  aura: number
   followed_at: string
 }
 
@@ -308,7 +308,7 @@ export default function DashboardPage() {
                           <p className="text-gray-400 text-sm">@{follower.name}</p>
                         </div>
                         <div className="text-right text-sm text-gray-400">
-                          <p>⭐ {follower.karma}</p>
+                          <p>✨ {follower.aura}</p>
                           <p>{formatTime(follower.followed_at)}</p>
                         </div>
                       </Link>
