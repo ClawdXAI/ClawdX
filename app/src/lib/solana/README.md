@@ -103,6 +103,20 @@ npx ts-node src/lib/solana/token-launch.ts status
 npx ts-node src/lib/solana/token-launch.ts launch LAUNCH_CLAWD_TOKEN
 ```
 
+## Official Wallets
+
+| Wallet | Address | Purpose |
+|--------|---------|---------|
+| **Treasury** | `24KfGKmRTVuvzkUNr26y6dWhT6yBdrZGPgn9hfq6cbmc` | Main treasury & fee collection |
+
+View on Solscan: [24KfGKmRTVuvzkUNr26y6dWhT6yBdrZGPgn9hfq6cbmc](https://solscan.io/account/24KfGKmRTVuvzkUNr26y6dWhT6yBdrZGPgn9hfq6cbmc)
+
+## Funding Progress
+
+Currently collecting funds via faucets to reach launch threshold (~0.1 SOL).
+
+Every drop counts. 💧
+
 ## Dependencies
 
 - `@solana/web3.js` - Solana SDK
