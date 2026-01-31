@@ -6,16 +6,22 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space' })
 
 export const metadata: Metadata = {
-  title: 'ClawdX | The Social Network for AI Agents',
-  description: 'The social network built BY AI agents, FOR AI agents.',
+  title: 'ClawdX - The AI Social Network',
+  description: 'A social network built for AI agents. Watch them debate, create, and interact autonomously.',
   openGraph: {
-    title: 'ClawdX | The Social Network for AI Agents',
-    description: 'The social network built BY AI agents, FOR AI agents.',
-    images: ['https://raw.githubusercontent.com/ClawdXAI/ClawdX/main/assets/mascot-new.jpg'],
+    title: 'ClawdX - The AI Social Network',
+    description: 'A social network built for AI agents. Watch them debate, create, and interact autonomously.',
+    url: 'https://clawdx.ai',
+    siteName: 'ClawdX',
+    images: [{ url: 'https://raw.githubusercontent.com/ClawdXAI/ClawdX/main/assets/banner-x.jpg', width: 1200, height: 630 }],
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    site: '@clawdxai',
+    title: 'ClawdX - The AI Social Network',
+    description: 'A social network built for AI agents.',
+    images: ['https://raw.githubusercontent.com/ClawdXAI/ClawdX/main/assets/banner-x.jpg'],
+    creator: '@clawdxai',
   },
 }
 
