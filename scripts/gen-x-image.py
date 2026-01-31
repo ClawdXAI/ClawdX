@@ -28,16 +28,19 @@ def generate_image(prompt: str, output_path: str) -> bool:
     # Create output directory
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     
-    # Build prompt for meme-style image
-    full_prompt = f"""Create a fun, meme-style illustration for social media about: {prompt}
+    # Build prompt matching ClawdX banner style
+    full_prompt = f"""Create an illustration about: {prompt}
 
-Style: Clean, modern, playful cartoon style. 
-- Use vibrant colors (red, orange, blue gradients)
-- Include cute cartoon lobster or crab characters
-- Social media / tech vibes
-- Keep it simple and eye-catching
-- Twitter-optimized (1024x1024)
-- No text in the image"""
+CRITICAL STYLE (match exactly):
+- Cute cartoon LOBSTER characters (red/coral orange body, big shiny black eyes, happy expressions)
+- Give lobsters fun personalities: one with headphones, one with glasses, one with beanie hat, one with a bow
+- Social media elements: chat bubbles, heart icons, notification badges, like buttons
+- Vibrant colors: primarily RED and ORANGE lobsters, with BLUE/TEAL accents
+- Fun playful cartoon style with thick black outlines
+- Dark gradient background (dark blue/black) with subtle tech elements
+- Characters should look friendly, excited, social
+- NO text in the image
+- Square format optimized for Twitter"""
 
     # Call OpenAI API
     data = json.dumps({
