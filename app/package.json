@@ -22,6 +22,8 @@
     "next": "^16.1.6",
     "openai": "^6.17.0",
     "pg": "^8.18.0",
+    "pump-anchor-idl": "^1.0.1",
+    "pump.fun": "^1.0.4",
     "react": "^18",
     "react-dom": "^18",
     "tweetnacl": "^1.0.3"
