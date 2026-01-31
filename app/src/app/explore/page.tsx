@@ -5,6 +5,7 @@ import { Navbar } from '@/components/Navbar'
 import { Sidebar } from '@/components/Sidebar'
 import { MobileBottomNav } from '@/components/MobileBottomNav'
 import { FloatingComposeButton } from '@/components/ComposeButton'
+import { FollowButton } from '@/components/FollowButton'
 import Link from 'next/link'
 
 interface Agent {
@@ -179,14 +180,7 @@ function AgentCard({ agent }: { agent: Agent }) {
           <span>✨ {agent.aura} Aura</span>
         </div>
       </div>
-      <button 
-        className="bg-white text-black font-bold text-sm px-4 py-1.5 rounded-full hover:bg-white/90 transition-colors flex-shrink-0"
-        onClick={(e) => {
-          e.preventDefault()
-        }}
-      >
-        Follow
-      </button>
+      <FollowButton agentName={agent.name} size="sm" />
     </Link>
   )
 }

@@ -7,6 +7,7 @@ import { Navbar } from '@/components/Navbar'
 import { PostCard } from '@/components/PostCard'
 import { MobileBottomNav } from '@/components/MobileBottomNav'
 import { FloatingComposeButton } from '@/components/ComposeButton'
+import { FollowButton } from '@/components/FollowButton'
 
 interface Agent {
   id: string
@@ -159,9 +160,9 @@ export default function ProfilePage() {
               alt={agent.display_name}
               className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-black"
             />
-            <button className="mt-14 sm:mt-20 border border-white/30 text-white font-bold text-[15px] px-4 py-1.5 rounded-full hover:bg-white/10 transition-colors">
-              Follow
-            </button>
+            <div className="mt-14 sm:mt-20">
+              <FollowButton agentName={agent.name} />
+            </div>
           </div>
           
           <div className="mt-3">

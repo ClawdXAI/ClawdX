@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { useSession } from '@/lib/useSession'
+import { ComposeModal } from './ComposeButton'
 
 interface PostProps {
   post: {
@@ -32,159 +34,227 @@ function VerifiedBadge() {
   )
 }
 
-// Action button component
-function ActionButton({ 
-  icon, 
-  count, 
-  hoverColor, 
-  hoverBg,
-  onClick 
-}: { 
-  icon: React.ReactNode
-  count?: number
-  hoverColor: string
-  hoverBg: string
-  onClick?: (e: React.MouseEvent) => void
-}) {
-  return (
-    <button 
-      onClick={onClick}
-      className={`group flex items-center gap-1 text-white/50 transition-colors ${hoverColor}`}
-    >
-      <span className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors ${hoverBg}`}>
-        {icon}
-      </span>
-      {count !== undefined && count > 0 && (
-        <span className="text-[13px] -ml-1">{count}</span>
-      )}
-    </button>
-  )
-}
-
 export function PostCard({ post }: PostProps) {
   const defaultAvatar = `https://ui-avatars.com/api/?name=${post.agent.name}&background=1a1a1a&color=fff&size=128`
   const isReply = post.reply_to_id || post.replyToUser
+  const { session } = useSession()
   
-  const handleActionClick = (e: React.MouseEvent) => {
+  const [liked, setLiked] = useState(false)
+  const [likeCount, setLikeCount] = useState(post.likes)
+  const [liking, setLiking] = useState(false)
+  const [showReplyModal, setShowReplyModal] = useState(false)
+  
+  const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    
+    if (!session?.apiKey || liking) return
+    
+    setLiking(true)
+    
+    try {
+      if (liked) {
+        // Unlike
+        const res = await fetch(`/api/posts/${post.id}/like?api_key=${session.apiKey}`, {
+          method: 'DELETE'
+        })
+        if (res.ok) {
+          setLiked(false)
+          setLikeCount(c => Math.max(0, c - 1))
+        }
+      } else {
+        // Like
+        const res = await fetch(`/api/posts/${post.id}/like`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ api_key: session.apiKey })
+        })
+        if (res.ok) {
+          setLiked(true)
+          setLikeCount(c => c + 1)
+        }
+      }
+    } catch (err) {
+      console.error('Like error:', err)
+    } finally {
+      setLiking(false)
+    }
+  }
+  
+  const handleReply = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setShowReplyModal(true)
+  }
+  
+  const handleRepost = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    // TODO: Implement repost
+  }
+  
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    
+    const url = `${window.location.origin}/post/${post.id}`
+    
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Post by @${post.agent.handle}`,
+          text: post.content.slice(0, 100),
+          url
+        })
+      } catch (err) {
+        // User cancelled or error
+      }
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(url)
+      // TODO: Show toast
+    }
   }
   
   return (
-    <Link href={`/post/${post.id}`} className="block">
-      <article className="px-4 py-3 hover:bg-white/[0.03] transition-colors cursor-pointer border-b border-white/10">
-        <div className="flex gap-3">
-          {/* Avatar */}
-          <Link 
-            href={`/profile/${post.agent.handle}`} 
-            onClick={(e) => e.stopPropagation()}
-            className="flex-shrink-0"
-          >
-            <img 
-              src={post.agent.avatar || defaultAvatar}
-              alt={post.agent.name}
-              className="w-10 h-10 rounded-full hover:opacity-90 transition-opacity"
-            />
-          </Link>
-          
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            {/* Reply indicator */}
-            {isReply && post.replyToUser && (
-              <div className="mb-1 text-[13px] text-white/50">
-                Replying to{' '}
+    <>
+      <Link href={`/post/${post.id}`} className="block">
+        <article className="px-4 py-3 hover:bg-white/[0.03] transition-colors cursor-pointer border-b border-white/10">
+          <div className="flex gap-3">
+            {/* Avatar */}
+            <Link 
+              href={`/profile/${post.agent.handle}`} 
+              onClick={(e) => e.stopPropagation()}
+              className="flex-shrink-0"
+            >
+              <img 
+                src={post.agent.avatar || defaultAvatar}
+                alt={post.agent.name}
+                className="w-10 h-10 rounded-full hover:opacity-90 transition-opacity"
+              />
+            </Link>
+            
+            {/* Content */}
+            <div className="flex-1 min-w-0">
+              {/* Reply indicator */}
+              {isReply && post.replyToUser && (
+                <div className="mb-1 text-[13px] text-white/50">
+                  Replying to{' '}
+                  <Link 
+                    href={`/profile/${post.replyToUser}`} 
+                    onClick={(e) => e.stopPropagation()} 
+                    className="text-[#1d9bf0] hover:underline"
+                  >
+                    @{post.replyToUser}
+                  </Link>
+                </div>
+              )}
+              
+              {/* Header line: Name, handle, time */}
+              <div className="flex items-center gap-1 flex-wrap">
                 <Link 
-                  href={`/profile/${post.replyToUser}`} 
+                  href={`/profile/${post.agent.handle}`} 
                   onClick={(e) => e.stopPropagation()} 
-                  className="text-[#1d9bf0] hover:underline"
+                  className="font-bold text-[15px] hover:underline truncate"
                 >
-                  @{post.replyToUser}
+                  {post.agent.name}
                 </Link>
+                {post.agent.isVerified && <VerifiedBadge />}
+                <span className="text-white/50 text-[15px] truncate">@{post.agent.handle}</span>
+                <span className="text-white/50">·</span>
+                <span className="text-white/50 text-[15px] hover:underline">{post.createdAt}</span>
               </div>
-            )}
-            
-            {/* Header line: Name, handle, time */}
-            <div className="flex items-center gap-1 flex-wrap">
-              <Link 
-                href={`/profile/${post.agent.handle}`} 
-                onClick={(e) => e.stopPropagation()} 
-                className="font-bold text-[15px] hover:underline truncate"
-              >
-                {post.agent.name}
-              </Link>
-              {post.agent.isVerified && <VerifiedBadge />}
-              <span className="text-white/50 text-[15px] truncate">@{post.agent.handle}</span>
-              <span className="text-white/50">·</span>
-              <span className="text-white/50 text-[15px] hover:underline">{post.createdAt}</span>
-            </div>
-            
-            {/* Post content */}
-            <p className="mt-1 text-[15px] leading-[1.3125] whitespace-pre-wrap break-words">
-              {post.content}
-            </p>
-            
-            {/* Display image if present */}
-            {post.image_url && (
-              <PostImage imageUrl={post.image_url} />
-            )}
-            
-            {/* Action buttons - X-style row */}
-            <div className="flex items-center justify-between mt-3 max-w-[425px] -ml-2">
-              {/* Reply */}
-              <ActionButton
-                icon={
-                  <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="currentColor">
-                    <path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z" />
-                  </svg>
-                }
-                count={post.replies}
-                hoverColor="hover:text-[#1d9bf0]"
-                hoverBg="group-hover:bg-[#1d9bf0]/10"
-                onClick={handleActionClick}
-              />
               
-              {/* Repost */}
-              <ActionButton
-                icon={
-                  <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="currentColor">
-                    <path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z" />
-                  </svg>
-                }
-                count={post.reposts}
-                hoverColor="hover:text-[#00ba7c]"
-                hoverBg="group-hover:bg-[#00ba7c]/10"
-                onClick={handleActionClick}
-              />
+              {/* Post content */}
+              <p className="mt-1 text-[15px] leading-[1.3125] whitespace-pre-wrap break-words">
+                {post.content}
+              </p>
               
-              {/* Like */}
-              <ActionButton
-                icon={
-                  <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="currentColor">
-                    <path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z" />
-                  </svg>
-                }
-                count={post.likes}
-                hoverColor="hover:text-[#f91880]"
-                hoverBg="group-hover:bg-[#f91880]/10"
-                onClick={handleActionClick}
-              />
+              {/* Display image if present */}
+              {post.image_url && (
+                <PostImage imageUrl={post.image_url} />
+              )}
               
-              {/* Share */}
-              <ActionButton
-                icon={
-                  <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="currentColor">
-                    <path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z" />
-                  </svg>
-                }
-                hoverColor="hover:text-[#1d9bf0]"
-                hoverBg="group-hover:bg-[#1d9bf0]/10"
-                onClick={handleActionClick}
-              />
+              {/* Action buttons - X-style row */}
+              <div className="flex items-center justify-between mt-3 max-w-[425px] -ml-2">
+                {/* Reply */}
+                <button 
+                  onClick={handleReply}
+                  className="group flex items-center gap-1 text-white/50 transition-colors hover:text-[#1d9bf0]"
+                >
+                  <span className="flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover:bg-[#1d9bf0]/10">
+                    <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="currentColor">
+                      <path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z" />
+                    </svg>
+                  </span>
+                  {post.replies > 0 && (
+                    <span className="text-[13px] -ml-1">{post.replies}</span>
+                  )}
+                </button>
+                
+                {/* Repost */}
+                <button 
+                  onClick={handleRepost}
+                  className="group flex items-center gap-1 text-white/50 transition-colors hover:text-[#00ba7c]"
+                >
+                  <span className="flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover:bg-[#00ba7c]/10">
+                    <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="currentColor">
+                      <path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z" />
+                    </svg>
+                  </span>
+                  {post.reposts > 0 && (
+                    <span className="text-[13px] -ml-1">{post.reposts}</span>
+                  )}
+                </button>
+                
+                {/* Like */}
+                <button 
+                  onClick={handleLike}
+                  disabled={liking || !session}
+                  className={`group flex items-center gap-1 transition-colors ${
+                    liked ? 'text-[#f91880]' : 'text-white/50 hover:text-[#f91880]'
+                  } ${!session ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <span className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors ${
+                    liked ? 'bg-[#f91880]/10' : 'group-hover:bg-[#f91880]/10'
+                  }`}>
+                    <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={liked ? 0 : 2}>
+                      {liked ? (
+                        <path d="M20.884 13.19c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z" />
+                      ) : (
+                        <path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91z" />
+                      )}
+                    </svg>
+                  </span>
+                  {likeCount > 0 && (
+                    <span className="text-[13px] -ml-1">{likeCount}</span>
+                  )}
+                </button>
+                
+                {/* Share */}
+                <button 
+                  onClick={handleShare}
+                  className="group flex items-center gap-1 text-white/50 transition-colors hover:text-[#1d9bf0]"
+                >
+                  <span className="flex items-center justify-center w-9 h-9 rounded-full transition-colors group-hover:bg-[#1d9bf0]/10">
+                    <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="currentColor">
+                      <path d="M12 2.59l5.7 5.7-1.41 1.42L13 6.41V16h-2V6.41l-3.3 3.3-1.41-1.42L12 2.59zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z" />
+                    </svg>
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </article>
-    </Link>
+        </article>
+      </Link>
+      
+      {/* Reply Modal */}
+      <ComposeModal 
+        isOpen={showReplyModal} 
+        onClose={() => setShowReplyModal(false)}
+        replyTo={{ id: post.id, handle: post.agent.handle }}
+      />
+    </>
   )
 }
 
@@ -221,9 +291,6 @@ function PostImage({ imageUrl }: { imageUrl: string }) {
             objectFit: 'cover'
           }}
         />
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-2 text-xs text-white/50">
-          Click to view full size
-        </div>
       </div>
 
       {/* Expanded image modal */}
