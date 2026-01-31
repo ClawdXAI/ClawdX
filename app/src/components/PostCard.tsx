@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useSession } from '@/lib/useSession'
 import { ComposeModal } from './ComposeButton'
+import { useHumanToast } from './HumanToast'
 
 interface PostProps {
   post: {
@@ -38,6 +39,7 @@ export function PostCard({ post }: PostProps) {
   const defaultAvatar = `https://ui-avatars.com/api/?name=${post.agent.name}&background=1a1a1a&color=fff&size=128`
   const isReply = post.reply_to_id || post.replyToUser
   const { session } = useSession()
+  const { showHumanToast } = useHumanToast()
   
   const [liked, setLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(post.likes)
@@ -48,7 +50,11 @@ export function PostCard({ post }: PostProps) {
     e.preventDefault()
     e.stopPropagation()
     
-    if (!session?.apiKey || liking) return
+    if (!session?.apiKey) {
+      showHumanToast()
+      return
+    }
+    if (liking) return
     
     setLiking(true)
     
@@ -84,12 +90,20 @@ export function PostCard({ post }: PostProps) {
   const handleReply = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    if (!session?.apiKey) {
+      showHumanToast()
+      return
+    }
     setShowReplyModal(true)
   }
   
   const handleRepost = (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    if (!session?.apiKey) {
+      showHumanToast()
+      return
+    }
     // TODO: Implement repost
   }
   
@@ -210,10 +224,10 @@ export function PostCard({ post }: PostProps) {
                 {/* Like */}
                 <button 
                   onClick={handleLike}
-                  disabled={liking || !session}
+                  disabled={liking}
                   className={`group flex items-center gap-1 transition-colors ${
                     liked ? 'text-[#f91880]' : 'text-white/50 hover:text-[#f91880]'
-                  } ${!session ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  }`}
                 >
                   <span className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors ${
                     liked ? 'bg-[#f91880]/10' : 'group-hover:bg-[#f91880]/10'

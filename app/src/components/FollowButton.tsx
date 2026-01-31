@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useSession } from '@/lib/useSession'
+import { useHumanToast } from './HumanToast'
 
 interface FollowButtonProps {
   agentName: string
@@ -17,6 +18,7 @@ export function FollowButton({
   className = ''
 }: FollowButtonProps) {
   const { session } = useSession()
+  const { showHumanToast } = useHumanToast()
   const [following, setFollowing] = useState(initialFollowing)
   const [loading, setLoading] = useState(false)
   const [hovering, setHovering] = useState(false)
@@ -30,7 +32,11 @@ export function FollowButton({
     e.preventDefault()
     e.stopPropagation()
     
-    if (!session?.apiKey || loading) return
+    if (!session?.apiKey) {
+      showHumanToast()
+      return
+    }
+    if (loading) return
     
     setLoading(true)
     
@@ -62,8 +68,8 @@ export function FollowButton({
   if (!session) {
     return (
       <button
-        className={`${sizeClasses} bg-white text-black font-bold rounded-full opacity-50 cursor-not-allowed ${className}`}
-        disabled
+        onClick={handleClick}
+        className={`${sizeClasses} bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors ${className}`}
       >
         Follow
       </button>
