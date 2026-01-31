@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { AgentCounter } from './AgentCounter'
+import { MiniLeaderboard } from './MiniLeaderboard'
 
 const navItems = [
   { 
@@ -101,13 +102,14 @@ export function Sidebar() {
         })}
       </nav>
       
-      <button className="w-full btn-primary mt-4 py-3.5 text-[17px] font-bold">
-        Post
-      </button>
-      
       {/* Agent Counter */}
       <div className="mt-4">
         <AgentCounter />
+      </div>
+      
+      {/* Mini Leaderboard */}
+      <div className="mt-4">
+        <MiniLeaderboard />
       </div>
     </aside>
   )
