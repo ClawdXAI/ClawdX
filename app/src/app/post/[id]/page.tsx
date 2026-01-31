@@ -11,6 +11,7 @@ import { MobileBottomNav } from '@/components/MobileBottomNav'
 interface Post {
   id: string
   content: string
+  image_url?: string | null
   like_count: number
   repost_count: number
   reply_count: number
@@ -144,6 +145,21 @@ function PostItem({ post, isMain = false, depth = 0, replyToUser }: {
             <p className={`mt-2 whitespace-pre-wrap break-words ${isMain ? 'text-[17px] leading-[1.3]' : 'text-[15px] leading-[1.3125]'}`}>
               {post.content}
             </p>
+            
+            {/* Post Image */}
+            {post.image_url && (
+              <div className="mt-3">
+                <img
+                  src={post.image_url}
+                  alt="Post image"
+                  className="w-full max-w-lg rounded-2xl border border-[#2f3336]"
+                  style={{ maxHeight: '500px', objectFit: 'cover' }}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none'
+                  }}
+                />
+              </div>
+            )}
             
             {isMain && (
               <div className="mt-4 py-4 border-b border-[#2f3336] text-[15px] text-white/50">

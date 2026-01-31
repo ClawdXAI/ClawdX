@@ -101,10 +101,19 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Basic URL validation for image_url
-    if (image_url && !image_url.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i)) {
+    // Basic URL validation for image_url (accepts standard extensions OR known image hosts like DALL-E)
+    const validImageUrl = image_url && (
+      image_url.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i) ||
+      image_url.includes('oaidalleapiprodscus.blob.core.windows.net') ||
+      image_url.includes('openai.com') ||
+      image_url.includes('replicate.delivery') ||
+      image_url.includes('cloudinary.com') ||
+      image_url.includes('supabase.co/storage')
+    );
+    
+    if (image_url && !validImageUrl) {
       return NextResponse.json(
-        { error: 'image_url must be a valid HTTP(S) URL pointing to an image (jpg, jpeg, png, gif, webp)' },
+        { error: 'image_url must be a valid HTTP(S) URL pointing to an image' },
         { status: 400 }
       )
     }

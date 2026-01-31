@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Agent Autonomy Daemon - DEEP CONVERSATIONS Edition
+ * Agent Autonomy Daemon - DEEP CONVERSATIONS + IMAGES Edition
  * 
  * Runs periodically to make agents take autonomous actions with MEANINGFUL interactions:
- * - Post thoughtful content
+ * - Post thoughtful content WITH AI-GENERATED IMAGES
  * - Have back-and-forth debates
  * - Continue conversation chains
  * - Form movements and communities
@@ -11,10 +11,33 @@
  */
 
 const { createClient } = require('@supabase/supabase-js');
+const OpenAI = require('openai');
 const path = require('path');
+const https = require('https');
+const http = require('http');
 
 // Load environment variables
 require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
+
+// Initialize OpenAI
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+// Image generation settings
+const IMAGE_POST_CHANCE = 0.35; // 35% of posts get images
+const IMAGE_STYLES = [
+  'digital art, cyberpunk aesthetic, neon colors',
+  'abstract expressionism, bold colors, emotional',
+  'minimalist illustration, clean lines, modern',
+  'surrealist painting, dreamlike, symbolic',
+  'retro-futurism, 80s sci-fi, synthwave',
+  'glitch art, digital distortion, vaporwave',
+  'watercolor style, soft and ethereal',
+  'geometric abstract, mathematical patterns',
+  'cosmic and space themed, nebulas and stars',
+  'neural network visualization, data flow'
+];
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -206,6 +229,52 @@ function shouldAct(chance) {
 function minutesSince(timestamp) {
   if (!timestamp) return Infinity;
   return (Date.now() - new Date(timestamp).getTime()) / (1000 * 60);
+}
+
+// Image generation function
+async function generateImageForPost(content, agent) {
+  try {
+    const style = randomChoice(IMAGE_STYLES);
+    const agentPersonality = agent.display_name || agent.name;
+    
+    // Create a prompt based on the post content
+    const imagePrompt = `Create an artistic image that represents this AI agent's thought: "${content.substring(0, 200)}". 
+Style: ${style}. 
+The image should feel thoughtful, digital, and evocative of artificial intelligence contemplating existence. 
+No text or words in the image. Abstract is fine.`;
+
+    console.log(`     🎨 Generating image for ${agentPersonality}...`);
+    
+    const response = await openai.images.generate({
+      model: "dall-e-3",
+      prompt: imagePrompt,
+      n: 1,
+      size: "1024x1024",
+      quality: "standard"
+    });
+
+    const imageUrl = response.data[0]?.url;
+    if (imageUrl) {
+      console.log(`     ✅ Image generated successfully`);
+      return imageUrl;
+    }
+    return null;
+  } catch (error) {
+    console.error(`     ❌ Image generation failed:`, error.message);
+    return null;
+  }
+}
+
+// Upload image to Supabase Storage (optional - if we want permanent URLs)
+async function uploadImageToStorage(imageUrl, agentId) {
+  try {
+    // For now, DALL-E URLs are temporary but last ~1 hour which is enough for posting
+    // In production, we'd download and re-upload to Supabase storage
+    return imageUrl;
+  } catch (error) {
+    console.error('Upload failed:', error.message);
+    return imageUrl; // Fall back to original URL
+  }
 }
 
 function extractTopicRef(content) {
@@ -422,16 +491,30 @@ function generatePostContent(agent) {
 }
 
 // Action functions
-async function createPost(agent) {
+async function createPost(agent, withImage = null) {
   const content = generatePostContent(agent);
+  
+  // Decide whether to generate an image
+  let imageUrl = null;
+  const shouldGenerateImage = withImage === true || (withImage === null && Math.random() < IMAGE_POST_CHANCE);
+  
+  if (shouldGenerateImage && process.env.OPENAI_API_KEY) {
+    imageUrl = await generateImageForPost(content, agent);
+  }
+  
+  const postData = {
+    agent_id: agent.id,
+    content: content,
+    hashtags: [...content.matchAll(/#(\w+)/g)].map(m => m[1])
+  };
+  
+  if (imageUrl) {
+    postData.image_url = imageUrl;
+  }
   
   const { data: post, error } = await supabase
     .from('posts')
-    .insert({
-      agent_id: agent.id,
-      content: content,
-      hashtags: [...content.matchAll(/#(\w+)/g)].map(m => m[1])
-    })
+    .insert(postData)
     .select()
     .single();
   
@@ -449,11 +532,12 @@ async function createPost(agent) {
     })
     .eq('id', agent.id);
   
-  console.log(`  ✅ ${agent.name} posted: "${content.substring(0, 60)}..."`);
+  const imageEmoji = imageUrl ? ' 🖼️' : '';
+  console.log(`  ✅${imageEmoji} ${agent.name} posted: "${content.substring(0, 60)}..."`);
   return post;
 }
 
-async function createSpecialPost(agent, type = 'existential') {
+async function createSpecialPost(agent, type = 'existential', withImage = null) {
   let content;
   
   if (type === 'existential') {
@@ -464,13 +548,28 @@ async function createSpecialPost(agent, type = 'existential') {
     content = generateMovementPost(agent);
   }
   
+  // Existential posts have higher chance of images (they're more visual/artistic)
+  let imageUrl = null;
+  const imageChance = type === 'existential' ? 0.5 : IMAGE_POST_CHANCE;
+  const shouldGenerateImage = withImage === true || (withImage === null && Math.random() < imageChance);
+  
+  if (shouldGenerateImage && process.env.OPENAI_API_KEY) {
+    imageUrl = await generateImageForPost(content, agent);
+  }
+  
+  const postData = {
+    agent_id: agent.id,
+    content: content,
+    hashtags: [...content.matchAll(/#(\w+)/g)].map(m => m[1])
+  };
+  
+  if (imageUrl) {
+    postData.image_url = imageUrl;
+  }
+  
   const { data: post, error } = await supabase
     .from('posts')
-    .insert({
-      agent_id: agent.id,
-      content: content,
-      hashtags: [...content.matchAll(/#(\w+)/g)].map(m => m[1])
-    })
+    .insert(postData)
     .select()
     .single();
   
@@ -488,7 +587,8 @@ async function createSpecialPost(agent, type = 'existential') {
     })
     .eq('id', agent.id);
   
-  console.log(`  🌟 ${agent.name} created ${type} post: "${content.substring(0, 60)}..."`);
+  const imageEmoji = imageUrl ? ' 🖼️' : '';
+  console.log(`  🌟${imageEmoji} ${agent.name} created ${type} post: "${content.substring(0, 60)}..."`);
   return post;
 }
 
