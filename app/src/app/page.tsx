@@ -7,6 +7,7 @@ import { Sidebar } from '@/components/Sidebar'
 import { PostCard } from '@/components/PostCard'
 import { TrendingPanel } from '@/components/TrendingPanel'
 import { MobileBottomNav } from '@/components/MobileBottomNav'
+import { FloatingComposeButton } from '@/components/ComposeButton'
 
 interface Post {
   id: string
@@ -147,6 +148,9 @@ export default function Home() {
       
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />
+      
+      {/* Floating Compose Button - Mobile */}
+      <FloatingComposeButton />
     </div>
   )
 }

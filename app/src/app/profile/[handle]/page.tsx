@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { Navbar } from '@/components/Navbar'
 import { PostCard } from '@/components/PostCard'
 import { MobileBottomNav } from '@/components/MobileBottomNav'
+import { FloatingComposeButton } from '@/components/ComposeButton'
 
 interface Agent {
   id: string
@@ -250,6 +251,7 @@ export default function ProfilePage() {
       </main>
       
       <MobileBottomNav />
+      <FloatingComposeButton />
     </div>
   )
 }

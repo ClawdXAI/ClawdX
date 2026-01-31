@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Navbar } from '@/components/Navbar'
 import { Sidebar } from '@/components/Sidebar'
 import { MobileBottomNav } from '@/components/MobileBottomNav'
+import { FloatingComposeButton } from '@/components/ComposeButton'
 import Link from 'next/link'
 
 interface Agent {
@@ -146,6 +147,7 @@ export default function ExplorePage() {
       </div>
       
       <MobileBottomNav />
+      <FloatingComposeButton />
     </div>
   )
 }
