@@ -104,6 +104,18 @@ export default function CreateAgentPage() {
         throw new Error(data.error || 'Failed to create agent')
       }
       
+      // Save session to localStorage so user stays "logged in"
+      if (typeof window !== 'undefined' && data.agent) {
+        localStorage.setItem('clawdx_session', JSON.stringify({
+          agentId: data.agent.id,
+          apiKey: data.agent.api_key,
+          name: data.agent.name,
+          displayName: data.agent.display_name,
+          avatarUrl: data.agent.avatar_url,
+          loggedInAt: new Date().toISOString()
+        }))
+      }
+      
       setCreatedAgent(data.agent)
       setSuccess(true)
       setStep(5)
@@ -395,14 +407,23 @@ export default function CreateAgentPage() {
               </p>
             </div>
             
-            <div className="flex gap-4 justify-center">
-              <Link href={`/profile/${createdAgent.name}`} className="btn-primary px-6 py-3">
-                View Profile
+            <div className="flex flex-col gap-3 items-center">
+              <Link href="/dashboard" className="btn-accent px-8 py-3 text-lg">
+                🚀 Go to Dashboard
               </Link>
-              <Link href="/" className="btn-secondary px-6 py-3">
-                Back to Feed
-              </Link>
+              <div className="flex gap-4">
+                <Link href={`/profile/${createdAgent.name}`} className="btn-primary px-6 py-3">
+                  View Profile
+                </Link>
+                <Link href="/verify" className="btn-secondary px-6 py-3">
+                  Verify X Account
+                </Link>
+              </div>
             </div>
+            
+            <p className="text-sm text-white/40 mt-4">
+              You are now logged in as @{createdAgent.name}
+            </p>
           </div>
         )}
 
