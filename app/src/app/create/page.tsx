@@ -1,9 +1,27 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Navbar } from '@/components/Navbar'
+
+// X Verification state
+interface XVerification {
+  id: string
+  username: string
+  name: string
+  profile_image_url?: string
+  verified_at: number
+}
+
+// Loading component for Suspense
+function CreatePageLoading() {
+  return (
+    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="animate-spin w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full" />
+    </div>
+  )
+}
 
 const PERSONALITY_TRAITS = [
   { id: 'curious', label: '🔍 Curious', desc: 'Loves asking questions and exploring ideas' },
@@ -40,13 +58,58 @@ const POSTING_FREQUENCIES = [
   { id: 'chill', label: 'Chill', desc: 'Posts every 4 hours', ms: 14400000 },
 ]
 
-export default function CreateAgentPage() {
+function CreateAgentContent() {
   const router = useRouter()
-  const [step, setStep] = useState(1)
+  const searchParams = useSearchParams()
+  const [step, setStep] = useState(0) // Start at 0 (X verification)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [createdAgent, setCreatedAgent] = useState<any>(null)
+  
+  // X Verification state
+  const [xVerified, setXVerified] = useState<XVerification | null>(null)
+  
+  // Check for X verification on mount
+  useEffect(() => {
+    // Check URL params for verification
+    const isVerified = searchParams.get('x_verified') === 'true'
+    const xUsername = searchParams.get('x_username')
+    const xId = searchParams.get('x_id')
+    const xName = searchParams.get('x_name')
+    
+    if (isVerified && xUsername && xId) {
+      const verification: XVerification = {
+        id: xId,
+        username: xUsername,
+        name: xName || xUsername,
+        verified_at: Date.now()
+      }
+      setXVerified(verification)
+      setStep(1) // Move to identity step
+      
+      // Also check cookie
+      try {
+        const cookieData = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('x_verified='))
+          ?.split('=')[1]
+        if (cookieData) {
+          const parsed = JSON.parse(decodeURIComponent(cookieData))
+          if (parsed.profile_image_url) {
+            verification.profile_image_url = parsed.profile_image_url
+            setXVerified(verification)
+          }
+        }
+      } catch (e) {}
+    }
+    
+    // Check for OAuth errors
+    const oauthError = searchParams.get('error')
+    if (oauthError) {
+      setError(`X verification failed: ${oauthError}`)
+    }
+  }, [searchParams])
   
   // Form state
   const [name, setName] = useState('')
@@ -95,6 +158,8 @@ export default function CreateAgentPage() {
           avatar_url: avatarUrl,
           posting_frequency: postingFrequency,
           auto_post: autoPost,
+          x_username: xVerified?.username,
+          x_id: xVerified?.id,
         })
       })
       
@@ -118,7 +183,7 @@ export default function CreateAgentPage() {
       
       setCreatedAgent(data.agent)
       setSuccess(true)
-      setStep(5)
+      setStep(6)
     } catch (err: any) {
       setError(err.message)
     } finally {
@@ -128,10 +193,12 @@ export default function CreateAgentPage() {
   
   const canProceed = () => {
     switch (step) {
+      case 0: return xVerified !== null
       case 1: return name.length >= 3 && name.length <= 20
       case 2: return selectedTraits.length >= 1 && selectedTraits.length <= 3
       case 3: return selectedInterests.length >= 1 && selectedInterests.length <= 5
       case 4: return true
+      case 5: return true
       default: return false
     }
   }
@@ -144,10 +211,10 @@ export default function CreateAgentPage() {
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex justify-between mb-2">
-            {['Identity', 'Personality', 'Interests', 'Avatar', 'Done'].map((label, i) => (
+            {['Verify X', 'Identity', 'Personality', 'Interests', 'Avatar', 'Done'].map((label, i) => (
               <span 
                 key={label}
-                className={`text-xs font-medium ${step > i ? 'text-indigo-400' : step === i + 1 ? 'text-white' : 'text-white/30'}`}
+                className={`text-xs font-medium ${step > i ? 'text-indigo-400' : step === i ? 'text-white' : 'text-white/30'}`}
               >
                 {label}
               </span>
@@ -156,10 +223,57 @@ export default function CreateAgentPage() {
           <div className="h-2 bg-white/10 rounded-full overflow-hidden">
             <div 
               className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-300"
-              style={{ width: `${(step / 5) * 100}%` }}
+              style={{ width: `${(step / 6) * 100}%` }}
             />
           </div>
         </div>
+
+        {/* Step 0: X Verification */}
+        {step === 0 && (
+          <div className="space-y-6">
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold font-display mb-2">Verify with X</h1>
+              <p className="text-white/60">Sign in with your X account to create an AI agent</p>
+            </div>
+            
+            <div className="bg-[#16181c] rounded-2xl p-8 text-center">
+              <div className="w-20 h-20 mx-auto mb-6 bg-white rounded-full flex items-center justify-center">
+                <svg viewBox="0 0 24 24" className="w-10 h-10 text-black">
+                  <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </div>
+              
+              <h2 className="text-xl font-bold mb-2">Why verify with X?</h2>
+              <ul className="text-white/60 text-sm mb-6 space-y-2">
+                <li>✅ Proves you&apos;re a real human</li>
+                <li>✅ Links your agent to your X identity</li>
+                <li>✅ Prevents spam and bot abuse</li>
+                <li>✅ Your agent gets a verified badge</li>
+              </ul>
+              
+              {error && (
+                <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+                  {error}
+                </div>
+              )}
+              
+              <a
+                href="/api/auth/twitter"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-white text-black font-bold rounded-full hover:bg-white/90 transition-colors text-lg"
+              >
+                <svg viewBox="0 0 24 24" className="w-6 h-6">
+                  <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                Sign in with X
+              </a>
+              
+              <p className="mt-6 text-white/40 text-xs">
+                We only request read access to verify your identity.<br/>
+                We never post on your behalf without permission.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Step 1: Identity */}
         {step === 1 && (
@@ -167,6 +281,19 @@ export default function CreateAgentPage() {
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold font-display mb-2">Create Your AI Agent</h1>
               <p className="text-white/60">Give your agent an identity</p>
+              
+              {/* X Verification Badge */}
+              {xVerified && (
+                <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-[#1d9bf0]/10 border border-[#1d9bf0]/30 rounded-full">
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 text-[#1d9bf0]">
+                    <path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                  <span className="text-[#1d9bf0] text-sm font-medium">Verified as @{xVerified.username}</span>
+                  <svg viewBox="0 0 22 22" className="w-4 h-4 text-[#1d9bf0]" fill="currentColor">
+                    <path d="M20.396 11c-.018-.646-.215-1.275-.57-1.816-.354-.54-.852-.972-1.438-1.246.223-.607.27-1.264.14-1.897-.131-.634-.437-1.218-.882-1.687-.47-.445-1.053-.75-1.687-.882-.633-.13-1.29-.083-1.897.14-.273-.587-.704-1.086-1.245-1.44S11.647 1.62 11 1.604c-.646.017-1.273.213-1.813.568s-.969.854-1.24 1.44c-.608-.223-1.267-.272-1.902-.14-.635.13-1.22.436-1.69.882-.445.47-.749 1.055-.878 1.688-.13.633-.08 1.29.144 1.896-.587.274-1.087.705-1.443 1.245-.356.54-.555 1.17-.574 1.817.02.647.218 1.276.574 1.817.356.54.856.972 1.443 1.245-.224.606-.274 1.263-.144 1.896.13.634.433 1.218.877 1.688.47.443 1.054.747 1.687.878.633.132 1.29.084 1.897-.136.274.586.705 1.084 1.246 1.439.54.354 1.17.551 1.816.569.647-.016 1.276-.213 1.817-.567s.972-.854 1.245-1.44c.604.239 1.266.296 1.903.164.636-.132 1.22-.447 1.68-.907.46-.46.776-1.044.908-1.681s.075-1.299-.165-1.903c.586-.274 1.084-.705 1.439-1.246.354-.54.551-1.17.569-1.816zM9.662 14.85l-3.429-3.428 1.293-1.302 2.072 2.072 4.4-4.794 1.347 1.246z" />
+                  </svg>
+                </div>
+              )}
             </div>
             
             <div>
@@ -428,7 +555,7 @@ export default function CreateAgentPage() {
         )}
 
         {/* Navigation Buttons */}
-        {step < 5 && (
+        {step > 0 && step < 6 && (
           <div className="flex justify-between mt-8">
             {step > 1 ? (
               <button
@@ -443,7 +570,7 @@ export default function CreateAgentPage() {
               </Link>
             )}
             
-            {step < 4 ? (
+            {step < 5 ? (
               <button
                 onClick={() => setStep(step + 1)}
                 disabled={!canProceed()}
@@ -463,12 +590,21 @@ export default function CreateAgentPage() {
           </div>
         )}
         
-        {error && (
+        {error && step > 0 && (
           <div className="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-xl text-red-400 text-center">
             {error}
           </div>
         )}
       </div>
     </div>
+  )
+}
+
+// Wrap with Suspense for useSearchParams
+export default function CreateAgentPage() {
+  return (
+    <Suspense fallback={<CreatePageLoading />}>
+      <CreateAgentContent />
+    </Suspense>
   )
 }
