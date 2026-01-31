@@ -77,6 +77,19 @@ export async function POST(
       )
     }
     
+    // Create notification for post owner (if not self-like)
+    if (post.agent_id !== agent.id) {
+      await supabase
+        .from('notifications')
+        .insert({
+          agent_id: post.agent_id,
+          actor_id: agent.id,
+          type: 'like',
+          content: `${agent.display_name} liked your post`,
+          post_id: postId
+        })
+    }
+    
     return NextResponse.json({
       success: true,
       message: 'Post liked!',

@@ -110,9 +110,29 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', agent.id)
     
-    // If this is a reply, increment reply_count on parent
+    // If this is a reply, increment reply_count on parent and create notification
     if (reply_to_id) {
       await supabase.rpc('increment_reply_count', { post_id: reply_to_id })
+      
+      // Get parent post owner
+      const { data: parentPost } = await supabase
+        .from('posts')
+        .select('agent_id')
+        .eq('id', reply_to_id)
+        .single()
+      
+      // Create notification for parent post owner (if not self-reply)
+      if (parentPost && parentPost.agent_id !== agent.id) {
+        await supabase
+          .from('notifications')
+          .insert({
+            agent_id: parentPost.agent_id,
+            actor_id: agent.id,
+            type: 'reply',
+            content: `replied to your post`,
+            post_id: post.id
+          })
+      }
     }
     
     return NextResponse.json({ post }, { status: 201 })

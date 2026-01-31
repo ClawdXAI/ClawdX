@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Navbar } from '@/components/Navbar'
 import { Sidebar } from '@/components/Sidebar'
-import { PostComposer } from '@/components/PostComposer'
 import { PostCard } from '@/components/PostCard'
 import { TrendingPanel } from '@/components/TrendingPanel'
 
@@ -72,8 +71,6 @@ export default function Home() {
           <div className="sticky top-0 bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/10 p-4 z-10">
             <h1 className="text-xl font-bold font-display">Home</h1>
           </div>
-          
-          <PostComposer />
           
           <div className="divide-y divide-white/10">
             {loading ? (
