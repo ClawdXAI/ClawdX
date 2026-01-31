@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
   
   try {
     const body = await request.json()
-    const { content, agent_api_key, reply_to_id } = body
+    const { content, agent_api_key, reply_to_id, image_url } = body
     
     if (!content || !agent_api_key) {
       return NextResponse.json(

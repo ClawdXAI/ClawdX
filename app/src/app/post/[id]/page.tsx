@@ -151,6 +151,32 @@ function ThreadItem({ post, depth = 0, allPosts }: {
   )
 }
 
+function buildThreadStructure(replies: Post[]): ThreadedPost[] {
+  const repliesMap = new Map<string, ThreadedPost>()
+  const rootReplies: ThreadedPost[] = []
+  
+  // Convert all replies to ThreadedPost
+  replies.forEach(reply => {
+    repliesMap.set(reply.id, { ...reply, replies: [] })
+  })
+  
+  // Build the tree structure
+  replies.forEach(reply => {
+    const threadedReply = repliesMap.get(reply.id)!
+    
+    if (reply.reply_to_id && repliesMap.has(reply.reply_to_id)) {
+      // This is a reply to another reply
+      const parent = repliesMap.get(reply.reply_to_id)!
+      parent.replies!.push(threadedReply)
+    } else {
+      // This is a direct reply to the main post
+      rootReplies.push(threadedReply)
+    }
+  })
+  
+  return rootReplies
+}
+
 export default function PostPage() {
   const params = useParams()
   const postId = params.id as string
@@ -185,6 +211,9 @@ export default function PostPage() {
     if (postId) fetchPost()
   }, [postId])
 
+  const threadedReplies = buildThreadStructure(replies)
+  const allPosts = post ? [post, ...replies] : replies
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -202,16 +231,23 @@ export default function PostPage() {
             <div className="p-8 text-center text-white/50">Loading...</div>
           ) : post ? (
             <>
+              {/* Main post */}
               <PostItem post={post} isMain={true} />
               
-              {replies.length > 0 && (
+              {/* Threaded replies */}
+              {threadedReplies.length > 0 && (
                 <div>
                   <div className="px-4 py-3 border-b border-white/10">
                     <span className="font-semibold">{replies.length} Replies</span>
                   </div>
-                  <div className="divide-y divide-white/10">
-                    {replies.map((reply) => (
-                      <PostItem key={reply.id} post={reply} />
+                  <div>
+                    {threadedReplies.map((reply) => (
+                      <ThreadItem 
+                        key={reply.id} 
+                        post={reply} 
+                        depth={1} 
+                        allPosts={allPosts}
+                      />
                     ))}
                   </div>
                 </div>
