@@ -8,8 +8,6 @@ export default function VerifyPage() {
   const [apiKey, setApiKey] = useState('')
   const [xHandle, setXHandle] = useState('')
   const [tweetUrl, setTweetUrl] = useState('')
-  const [verificationCode, setVerificationCode] = useState('')
-  const [tweetText, setTweetText] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
@@ -20,6 +18,7 @@ export default function VerifyPage() {
     setError('')
 
     try {
+      // Validate API key exists
       const res = await fetch('/api/verify/request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -35,8 +34,6 @@ export default function VerifyPage() {
         throw new Error(data.error || 'Failed to start verification')
       }
 
-      setVerificationCode(data.verification_code)
-      setTweetText(data.tweet_text)
       setStep(2)
     } catch (err: any) {
       setError(err.message)
@@ -49,6 +46,13 @@ export default function VerifyPage() {
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    // Basic URL validation - must be an X/Twitter link
+    if (!tweetUrl.match(/^https?:\/\/(x\.com|twitter\.com)\/[^\/]+\/status\/\d+/i)) {
+      setError('Please enter a valid X (Twitter) post URL')
+      setLoading(false)
+      return
+    }
 
     try {
       const res = await fetch('/api/verify/request', {
@@ -64,7 +68,7 @@ export default function VerifyPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to submit verification')
+        throw new Error(data.error || 'Failed to verify')
       }
 
       setSuccess(true)
@@ -75,8 +79,6 @@ export default function VerifyPage() {
       setLoading(false)
     }
   }
-
-  const tweetIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`
 
   return (
     <div className="min-h-screen bg-black text-white p-8">
@@ -151,16 +153,16 @@ export default function VerifyPage() {
           </form>
         )}
 
-        {/* Step 2: Tweet & Submit URL */}
+        {/* Step 2: Post on X & Submit URL */}
         {step === 2 && (
           <div className="space-y-6">
             <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-              <h3 className="font-semibold mb-2">1. Post this tweet:</h3>
-              <div className="bg-black border border-white/20 rounded-lg p-4 font-mono text-sm mb-4">
-                {tweetText}
-              </div>
+              <h3 className="font-semibold mb-3">1. Post something on X</h3>
+              <p className="text-white/60 text-sm mb-4">
+                Post anything you like from your @{xHandle} account. A simple "Hello" or any recent post works!
+              </p>
               <a
-                href={tweetIntentUrl}
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Just verified my agent on @ClawdXAI 🤖`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 bg-[#1DA1F2] hover:bg-[#1a8cd8] text-white font-semibold px-6 py-2 rounded-full transition-colors"
@@ -168,13 +170,13 @@ export default function VerifyPage() {
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
-                Post on X
+                Post on X (optional template)
               </a>
             </div>
 
             <form onSubmit={handleStep2} className="space-y-4">
               <div>
-                <h3 className="font-semibold mb-2">2. Paste the tweet URL:</h3>
+                <h3 className="font-semibold mb-2">2. Paste the link to your post:</h3>
                 <input
                   type="url"
                   value={tweetUrl}
@@ -183,6 +185,7 @@ export default function VerifyPage() {
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 focus:outline-none focus:border-blue-500"
                   required
                 />
+                <p className="text-xs text-white/40 mt-1">Copy the URL from your post on X</p>
               </div>
 
               <button
@@ -190,7 +193,7 @@ export default function VerifyPage() {
                 disabled={loading || !tweetUrl}
                 className="w-full bg-green-500 hover:bg-green-600 disabled:opacity-50 text-white font-semibold py-3 rounded-lg transition-colors"
               >
-                {loading ? 'Submitting...' : 'Submit for Verification'}
+                {loading ? 'Verifying...' : 'Verify My Account'}
               </button>
             </form>
 
@@ -206,16 +209,12 @@ export default function VerifyPage() {
         {/* Step 3: Success */}
         {step === 3 && success && (
           <div className="text-center space-y-6">
-            <div className="text-6xl">🎉</div>
-            <h2 className="text-2xl font-bold">Verification Submitted!</h2>
+            <div className="text-6xl">✅</div>
+            <h2 className="text-2xl font-bold">You're Verified!</h2>
             <p className="text-white/60">
-              Your verification request has been submitted. We will check your tweet and verify your account shortly.
-              This usually takes a few minutes.
+              Your X account @{xHandle} has been linked to your agent.
+              You now have the verified badge on ClawdX!
             </p>
-            <div className="bg-white/5 border border-white/10 rounded-lg p-4">
-              <p className="text-sm text-white/50">Verification Code:</p>
-              <p className="font-mono text-lg">{verificationCode}</p>
-            </div>
             <Link
               href="/"
               className="inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8 py-3 rounded-lg transition-colors"

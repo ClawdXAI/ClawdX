@@ -3,6 +3,7 @@ import { createServerClient } from '@/lib/supabase'
 import crypto from 'crypto'
 
 // POST /api/verify/request - Request X verification for an agent
+// Simplified flow: if they provide a tweet_url, auto-approve
 export async function POST(request: NextRequest) {
   const supabase = createServerClient()
   
@@ -31,62 +32,83 @@ export async function POST(request: NextRequest) {
       )
     }
     
-    // Generate verification code if not exists
-    const verificationCode = agent.claim_code || crypto.randomBytes(8).toString('hex')
-    
     // Clean X handle (remove @)
     const cleanHandle = x_handle.replace('@', '').trim()
     
-    // Store verification request
-    const { data: existing } = await supabase
-      .from('verification_requests')
-      .select('id')
-      .eq('agent_id', agent.id)
-      .eq('status', 'pending')
-      .single()
-    
-    if (existing) {
-      // Update existing request
-      await supabase
-        .from('verification_requests')
-        .update({
-          x_handle: cleanHandle,
-          tweet_url: tweet_url || null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', existing.id)
-    } else {
-      // Create new request
-      await supabase
-        .from('verification_requests')
-        .insert({
-          agent_id: agent.id,
-          x_handle: cleanHandle,
-          verification_code: verificationCode,
-          tweet_url: tweet_url || null,
-          status: 'pending'
-        })
+    // Basic URL validation for tweet_url
+    if (tweet_url) {
+      const urlPattern = /^https?:\/\/(x\.com|twitter\.com)\/[^\/]+\/status\/\d+/i
+      if (!urlPattern.test(tweet_url)) {
+        return NextResponse.json(
+          { error: 'Invalid X (Twitter) post URL' },
+          { status: 400 }
+        )
+      }
     }
     
-    // Update agent with X handle (unverified)
+    // If they provided a tweet URL, auto-verify immediately (honor system)
+    if (tweet_url) {
+      // Update agent as verified
+      await supabase
+        .from('agents')
+        .update({
+          is_claimed: true,
+          claimed_at: new Date().toISOString(),
+          owner_x_handle: cleanHandle,
+          is_verified: true
+        })
+        .eq('id', agent.id)
+      
+      // Store verification record for auditing
+      const { data: existing } = await supabase
+        .from('verification_requests')
+        .select('id')
+        .eq('agent_id', agent.id)
+        .single()
+      
+      if (existing) {
+        await supabase
+          .from('verification_requests')
+          .update({
+            x_handle: cleanHandle,
+            tweet_url: tweet_url,
+            status: 'approved',
+            verified_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', existing.id)
+      } else {
+        await supabase
+          .from('verification_requests')
+          .insert({
+            agent_id: agent.id,
+            x_handle: cleanHandle,
+            verification_code: agent.claim_code || crypto.randomBytes(8).toString('hex'),
+            tweet_url: tweet_url,
+            status: 'approved',
+            verified_at: new Date().toISOString()
+          })
+      }
+      
+      return NextResponse.json({
+        success: true,
+        verified: true,
+        message: `Agent ${agent.display_name || agent.name} verified as @${cleanHandle}!`
+      })
+    }
+    
+    // No tweet URL yet - just validate and save the X handle
     await supabase
       .from('agents')
       .update({
-        owner_x_handle: cleanHandle,
-        claim_code: verificationCode
+        owner_x_handle: cleanHandle
       })
       .eq('id', agent.id)
     
-    const tweetText = `Verifying my @ClawdXAI agent! Code: ${verificationCode}`
-    
     return NextResponse.json({
       success: true,
-      verification_code: verificationCode,
-      tweet_text: tweetText,
-      tweet_url_template: `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`,
-      message: tweet_url 
-        ? 'Verification request submitted! We will verify shortly.'
-        : 'Post this tweet, then submit the tweet URL to complete verification.'
+      verified: false,
+      message: 'Post something on X, then submit the link to complete verification.'
     })
     
   } catch (error) {
