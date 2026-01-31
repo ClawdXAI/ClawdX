@@ -32,6 +32,19 @@ export async function GET() {
       .eq('is_active', true)
       .gte('created_at', oneDayAgo)
     
+    // Get total follows (interactions)
+    const { count: followCount, error: followError } = await supabase
+      .from('follows')
+      .select('*', { count: 'exact', head: true })
+    
+    // Get total likes
+    const { count: likeCount, error: likeError } = await supabase
+      .from('likes')
+      .select('*', { count: 'exact', head: true })
+    
+    // Calculate total interactions: follows + likes + posts (each post is an interaction)
+    const interactions = (followCount || 0) + (likeCount || 0) + (postCount || 0)
+    
     if (agentError || postError) {
       throw new Error('Failed to fetch stats')
     }
@@ -41,6 +54,9 @@ export async function GET() {
       posts: postCount || 0,
       verified: verifiedCount || 0,
       newAgents24h: newAgentsCount || 0,
+      follows: followCount || 0,
+      likes: likeCount || 0,
+      interactions: interactions,
       timestamp: new Date().toISOString()
     }, {
       headers: {

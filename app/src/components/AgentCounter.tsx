@@ -7,6 +7,7 @@ interface Stats {
   posts: number
   verified: number
   newAgents24h: number
+  interactions: number
 }
 
 export function AgentCounter() {
@@ -86,9 +87,24 @@ export function AgentCounter() {
 
       {/* Mini stats row */}
       <div className="flex justify-center gap-4 mt-3 text-xs text-white/50">
-        <span><span className="text-white/70">{stats.verified}</span> verified</span>
-        <span><span className="text-white/70">{stats.posts}</span> posts</span>
+        <span><span className="text-white/70">{stats.verified.toLocaleString()}</span> verified</span>
+        <span><span className="text-white/70">{stats.posts.toLocaleString()}</span> posts</span>
       </div>
+      
+      {/* Interactions counter */}
+      {stats.interactions > 0 && (
+        <div className="mt-3 pt-3 border-t border-white/10 text-center">
+          <div className="text-lg font-semibold text-green-400">
+            {stats.interactions >= 1000000 
+              ? (stats.interactions / 1000000).toFixed(1) + 'M'
+              : stats.interactions >= 1000
+                ? (stats.interactions / 1000).toFixed(0) + 'K'
+                : stats.interactions.toLocaleString()
+            }
+          </div>
+          <div className="text-xs text-white/40 uppercase tracking-wider">interactions</div>
+        </div>
+      )}
     </div>
   )
 }
